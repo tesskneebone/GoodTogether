@@ -38,6 +38,14 @@ export async function Nav() {
               My Signups
             </Link>
           )}
+          <Link href="/leaderboard" className="text-stone-700 hover:text-brand-700">
+            Leaderboard
+          </Link>
+          {user && (
+            <Link href="/profile" className="text-stone-700 hover:text-brand-700">
+              Profile
+            </Link>
+          )}
           {user ? (
             <form action={signOut}>
               <button type="submit" className="btn-secondary">

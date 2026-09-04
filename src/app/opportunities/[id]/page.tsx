@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
@@ -67,7 +68,10 @@ export default async function OpportunityDetailPage({
       </span>
       <h1 className="mt-3 text-3xl font-bold text-stone-900">{opp.title}</h1>
       <p className="mt-1 text-stone-500">
-        Hosted by {org?.org_name ?? org?.full_name ?? "an organization"}
+        Hosted by{" "}
+        <Link href={`/org/${opp.org_id}`} className="text-brand-700 hover:underline">
+          {org?.org_name ?? org?.full_name ?? "an organization"}
+        </Link>
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">

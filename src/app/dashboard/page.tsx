@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { DeleteOpportunityButton } from "@/components/delete-opportunity-button";
+import { BadgeGrid } from "@/components/badge-grid";
+import { getVolunteerStats } from "@/lib/volunteer-stats";
+import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
 import type { Opportunity } from "@/types/database";
 
 export default async function DashboardPage() {
@@ -97,12 +100,57 @@ export default async function DashboardPage() {
     .eq("status", "confirmed")
     .order("created_at", { ascending: false });
 
+  const stats = await getVolunteerStats(supabase, user.id);
+  const milestoneBadges = getMilestoneBadges(stats);
+  const categoryBadges = getCategoryBadges(stats);
+  const weeklyBadge = getWeeklyBadge(stats);
+  const earnedCount =
+    milestoneBadges.filter((b) => b.earned).length +
+    categoryBadges.filter((b) => b.earned).length +
+    (weeklyBadge.earned ? 1 : 0);
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="text-2xl font-semibold text-stone-900">My signups</h1>
-      <p className="mt-1 text-sm text-stone-500">
-        Opportunities you&apos;ve volunteered for.
-      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-stone-900">My signups</h1>
+          <p className="mt-1 text-sm text-stone-500">
+            Opportunities you&apos;ve volunteered for.
+          </p>
+        </div>
+        <Link href="/dashboard/calendar" className="btn-secondary">
+          Calendar view
+        </Link>
+      </div>
+
+      <div className="card mt-6 p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-semibold text-stone-900">Your Impact</h2>
+          <Link href="/leaderboard" className="text-sm font-medium text-brand-700 hover:underline">
+            See leaderboard &rarr;
+          </Link>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-8">
+          <div>
+            <p className="text-3xl font-bold text-brand-700">{stats.totalHours}</p>
+            <p className="text-sm text-stone-500">hours volunteered</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-brand-700">{stats.completedCount}</p>
+            <p className="text-sm text-stone-500">opportunities completed</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-brand-700">{earnedCount}</p>
+            <p className="text-sm text-stone-500">badges earned</p>
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-6">
+          <BadgeGrid title="Milestones" badges={milestoneBadges} />
+          <BadgeGrid title="This week" badges={[weeklyBadge]} />
+          <BadgeGrid title="Causes" badges={categoryBadges} />
+        </div>
+      </div>
 
       {!signups || signups.length === 0 ? (
         <div className="card mt-8 p-8 text-center text-stone-500">

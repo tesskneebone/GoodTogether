@@ -48,6 +48,12 @@ export type Signup = {
   created_at: string;
 };
 
+export type VolunteerHours = {
+  volunteer_id: string;
+  full_name: string;
+  total_hours: number;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -102,7 +108,16 @@ export type Database = {
         ];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      volunteer_hours_alltime: {
+        Row: VolunteerHours;
+        Relationships: [];
+      };
+      volunteer_hours_weekly: {
+        Row: VolunteerHours;
+        Relationships: [];
+      };
+    };
     Functions: Record<string, never>;
     Enums: {
       user_role: UserRole;

@@ -22,7 +22,9 @@ cause and neighborhood, and sign up.
 2. Create a [Supabase project](https://supabase.com/dashboard), then open the
    SQL editor and run everything in [`supabase/schema.sql`](./supabase/schema.sql).
    This creates the `profiles`, `opportunities`, and `signups` tables, an
-   auto-profile-creation trigger, and Row Level Security policies.
+   auto-profile-creation trigger, and Row Level Security policies. Then run
+   [`supabase/migrations/002_leaderboard_views.sql`](./supabase/migrations/002_leaderboard_views.sql)
+   to add the views powering the leaderboard.
 
 3. Copy the env template and fill in your Supabase project's URL and anon key
    (Project Settings -> API in the Supabase dashboard):
