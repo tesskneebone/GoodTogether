@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile } from "@/lib/actions/profile";
+import { AvatarUploader } from "@/components/avatar-uploader";
+import { LA_NEIGHBORHOODS } from "@/lib/constants";
 import type { Profile } from "@/types/database";
 
 export function ProfileForm({ profile }: { profile: Profile }) {
@@ -10,6 +12,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,7 +31,15 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <input type="hidden" name="avatar_url" value={avatarUrl} />
+      <AvatarUploader
+        userId={profile.id}
+        initialUrl={profile.avatar_url}
+        fullName={profile.full_name}
+        onUploaded={setAvatarUrl}
+      />
+
       <div>
         <label className="mb-1 block text-sm font-medium text-stone-700">
           {profile.role === "org" ? "Your name" : "Full name"}
@@ -41,7 +52,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         />
       </div>
 
-      {profile.role === "org" && (
+      {profile.role === "org" ? (
         <div>
           <label className="mb-1 block text-sm font-medium text-stone-700">
             Organization name
@@ -52,6 +63,37 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             className="input"
             defaultValue={profile.org_name ?? ""}
           />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-stone-700">Age</label>
+            <input
+              type="number"
+              name="age"
+              min={13}
+              max={120}
+              className="input"
+              defaultValue={profile.age ?? ""}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-stone-700">
+              Neighborhood
+            </label>
+            <select
+              name="neighborhood"
+              className="input"
+              defaultValue={profile.neighborhood ?? ""}
+            >
+              <option value="">Not set</option>
+              {LA_NEIGHBORHOODS.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 

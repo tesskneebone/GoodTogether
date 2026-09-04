@@ -21,6 +21,9 @@ export type Profile = {
   full_name: string;
   org_name: string | null;
   bio: string | null;
+  age: number | null;
+  neighborhood: string | null;
+  avatar_url: string | null;
   created_at: string;
 };
 
@@ -51,6 +54,7 @@ export type Signup = {
 export type VolunteerHours = {
   volunteer_id: string;
   full_name: string;
+  avatar_url: string | null;
   total_hours: number;
 };
 

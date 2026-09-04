@@ -22,6 +22,18 @@ function LeaderboardList({ rows }: { rows: VolunteerHours[] }) {
                 <span className="text-sm font-medium text-stone-400">{i + 1}</span>
               )}
             </span>
+            {row.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={row.avatar_url}
+                alt=""
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sunset-300 to-brand-400 text-xs font-bold text-white">
+                {row.full_name?.[0]?.toUpperCase() ?? "?"}
+              </span>
+            )}
             <span className="font-medium text-stone-900">{row.full_name}</span>
           </div>
           <span className="font-semibold text-brand-700">{row.total_hours}h</span>

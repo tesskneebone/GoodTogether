@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
+import { Logo } from "@/components/logo";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -15,7 +16,8 @@ export default async function Home() {
     <div>
       <section className="border-b border-stone-200 bg-gradient-to-b from-brand-50 to-stone-50">
         <div className="mx-auto max-w-6xl px-4 py-20 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">
+          <Logo className="mx-auto h-16 w-16" />
+          <h1 className="mt-6 text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">
             Volunteer across Los Angeles,
             <br />
             <span className="text-brand-600">together.</span>
