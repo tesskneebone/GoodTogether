@@ -1,33 +1,23 @@
 export function Logo({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden="true">
+    <svg
+      viewBox="0 0 120 100"
+      className={className}
+      fill="none"
+      stroke="#1e8a96"
+      strokeWidth={5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M14,94 C8,72 8,48 16,32 C20,24 25,19 24,14 C23,10 18,11 17,16 C16,20 19,23 24,22 C34,26 44,38 50,52" />
+      <path d="M18,62 C16,54 20,48 27,49 C33,50 35,56 31,61 C28,65 21,66 18,62" />
+      <path d="M106,94 C112,72 112,48 104,32 C100,24 95,19 96,14 C97,10 102,11 103,16 C104,20 101,23 96,22 C86,26 76,38 70,52" />
+      <path d="M102,62 C104,54 100,48 93,49 C87,50 85,56 89,61 C92,65 99,66 102,62" />
       <path
-        d="M50,85 C35,82 15,75 10,58 C7,48 10,38 20,35 C28,33 34,38 37,46 C40,55 45,72 50,85 Z"
-        fill="#1b835c"
-      />
-      <ellipse
-        cx="13"
-        cy="53"
-        rx="7"
-        ry="9"
-        fill="#1b835c"
-        transform="rotate(-20 13 53)"
-      />
-      <path
-        d="M50,85 C65,82 85,75 90,58 C93,48 90,38 80,35 C72,33 66,38 63,46 C60,55 55,72 50,85 Z"
-        fill="#1b835c"
-      />
-      <ellipse
-        cx="87"
-        cy="53"
-        rx="7"
-        ry="9"
-        fill="#1b835c"
-        transform="rotate(20 87 53)"
-      />
-      <path
-        d="M50,45 C41,37 30,30 30,20 C30,13 36,8 43,11 C46,12 48,15 50,19 C52,15 54,12 57,11 C64,8 70,13 70,20 C70,30 59,37 50,45 Z"
-        fill="#28a373"
+        d="M60,58 C48,48 30,38 30,23 C30,13 38,6 48,9 C53,10 57,14 60,19 C63,14 67,10 72,9 C82,6 90,13 90,23 C90,38 72,48 60,58 Z"
+        fill="#1e8a96"
+        stroke="none"
       />
     </svg>
   );
