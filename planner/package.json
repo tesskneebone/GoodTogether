@@ -1,0 +1,13 @@
+{
+  "name": "school-gym-planner",
+  "private": true,
+  "type": "module",
+  "description": "Plans school commutes around traffic, gym sessions, and homework blocks in Outlook.",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "plan": "node src/cli.mjs",
+    "write": "node src/cli.mjs --write",
+    "demo": "node src/cli.mjs --demo",
+    "test": "node --test test/*.test.mjs"
+  }
+}

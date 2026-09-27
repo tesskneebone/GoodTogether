@@ -1,0 +1,29 @@
+{
+  "timeZone": "America/Los_Angeles",
+  "places": {
+    "home": "YOUR HOME ADDRESS, Los Angeles, CA",
+    "school": "UCLA Parking Structure 8, Los Angeles, CA 90095"
+  },
+  "outlook": { "clientId": "PASTE-APPLICATION-CLIENT-ID", "tenant": "common" },
+  "classes": { "categories": ["Class"], "subjectKeywords": ["LEC", "DIS", "LAB", "SEM", "Lecture", "Discussion"] },
+  "commute": {
+    "maxDriveMinutes": 40,
+    "arrivalBufferMinutes": 10,
+    "leaveBufferMinutes": 10,
+    "searchWindowMinutes": 150,
+    "stepMinutes": 15,
+    "earliestDeparture": "06:30",
+    "waitCostPerMinute": 0.25
+  },
+  "gym": { "durationMinutes": 120, "daysPerWeek": 4, "open": "06:00", "close": "22:00" },
+  "homework": {
+    "hoursPerDay": 3,
+    "weekendHoursPerDay": 4,
+    "earliest": "08:00",
+    "latest": "22:00",
+    "minBlockMinutes": 45,
+    "maxBlockMinutes": 90,
+    "breakMinutes": 15
+  },
+  "plannerCategory": "AutoPlan"
+}

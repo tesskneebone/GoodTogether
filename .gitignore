@@ -30,3 +30,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# planner: personal config and cached Outlook sign-in
+/planner/config.json
+/planner/.outlook-token.json
