@@ -93,6 +93,12 @@ export type Follow = {
   created_at: string;
 };
 
+export type SavedOpportunity = {
+  volunteer_id: string;
+  opportunity_id: string;
+  created_at: string;
+};
+
 export type VolunteerHours = {
   volunteer_id: string;
   full_name: string;
@@ -217,6 +223,27 @@ export type Database = {
             columns: ["following_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      saved_opportunities: {
+        Row: SavedOpportunity;
+        Insert: Partial<SavedOpportunity> & { volunteer_id: string; opportunity_id: string };
+        Update: Partial<SavedOpportunity>;
+        Relationships: [
+          {
+            foreignKeyName: "saved_opportunities_volunteer_id_fkey";
+            columns: ["volunteer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "saved_opportunities_opportunity_id_fkey";
+            columns: ["opportunity_id"];
+            isOneToOne: false;
+            referencedRelation: "opportunities";
             referencedColumns: ["id"];
           }
         ];

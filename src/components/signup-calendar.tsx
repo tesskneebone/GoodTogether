@@ -10,9 +10,16 @@ export interface CalendarEvent {
   title: string;
   startsAt: string;
   category: OpportunityCategory;
-  /** Present for a signed-up opportunity (links to its page); absent for a logged activity. */
+  kind: "signup" | "logged" | "saved";
+  /** Present for a signup or a saved (imported) opportunity -- links to its page. */
   href?: string;
 }
+
+const KIND_STYLES: Record<CalendarEvent["kind"], { pill: string; label: string }> = {
+  signup: { pill: "bg-brand-100 text-brand-800 hover:bg-brand-200", label: "signed up" },
+  saved: { pill: "bg-sky-100 text-sky-800 hover:bg-sky-200", label: "saved" },
+  logged: { pill: "bg-sunset-100 text-sunset-800", label: "logged" },
+};
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -96,26 +103,28 @@ export function SignupCalendar({ events }: { events: CalendarEvent[] }) {
                 {date.getDate()}
               </p>
               <div className="mt-1 space-y-0.5">
-                {dayEvents.slice(0, 2).map((event) =>
-                  event.href ? (
+                {dayEvents.slice(0, 2).map((event) => {
+                  const style = KIND_STYLES[event.kind];
+                  const title = `${event.title} · ${CATEGORY_LABELS[event.category]} (${style.label})`;
+                  return event.href ? (
                     <Link
                       key={event.id}
                       href={event.href}
-                      className="block truncate rounded bg-brand-100 px-1 py-0.5 text-[10px] font-medium text-brand-800 hover:bg-brand-200"
-                      title={`${event.title} · ${CATEGORY_LABELS[event.category]}`}
+                      className={`block truncate rounded px-1 py-0.5 text-[10px] font-medium transition ${style.pill}`}
+                      title={title}
                     >
                       {event.title}
                     </Link>
                   ) : (
                     <span
                       key={event.id}
-                      className="block truncate rounded bg-sunset-100 px-1 py-0.5 text-[10px] font-medium text-sunset-800"
-                      title={`${event.title} · ${CATEGORY_LABELS[event.category]} (logged)`}
+                      className={`block truncate rounded px-1 py-0.5 text-[10px] font-medium ${style.pill}`}
+                      title={title}
                     >
                       {event.title}
                     </span>
-                  )
-                )}
+                  );
+                })}
                 {dayEvents.length > 2 && (
                   <p className="text-[10px] text-stone-500">+{dayEvents.length - 2} more</p>
                 )}

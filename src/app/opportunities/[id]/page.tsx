@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { SignupButton } from "@/components/signup-button";
+import { SaveToCalendarButton } from "@/components/save-to-calendar-button";
 
 export default async function OpportunityDetailPage({
   params,
@@ -36,6 +37,17 @@ export default async function OpportunityDetailPage({
 
   let isSignedUp = false;
   let canSignUp = false;
+  let isSaved = false;
+
+  if (user && isImported) {
+    const { data: saved } = await supabase
+      .from("saved_opportunities")
+      .select("volunteer_id")
+      .eq("volunteer_id", user.id)
+      .eq("opportunity_id", id)
+      .maybeSingle();
+    isSaved = !!saved;
+  }
 
   if (user && !isImported) {
     const { data: profile } = await supabase
@@ -146,15 +158,24 @@ export default async function OpportunityDetailPage({
       </div>
 
       {isImported ? (
-        <div className="card mt-8 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="card mt-8 flex flex-col gap-3 p-5">
           <p className="text-sm text-stone-600">
             Signups for this opportunity happen on {opp.source_name ?? "the original site"}.
+            Planning to go? Add it to your calendar so you don&apos;t forget.
           </p>
-          {opp.source_url && (
-            <a href={opp.source_url} target="_blank" rel="noopener noreferrer" className="btn-primary sm:w-64 text-center">
-              View &amp; sign up on {opp.source_name ?? "source site"}
-            </a>
-          )}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            {opp.source_url && (
+              <a
+                href={opp.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary text-center sm:w-64"
+              >
+                View &amp; sign up on {opp.source_name ?? "source site"}
+              </a>
+            )}
+            <SaveToCalendarButton opportunityId={opp.id} initialSaved={isSaved} isLoggedIn={!!user} />
+          </div>
         </div>
       ) : (
         <div className="card mt-8 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">

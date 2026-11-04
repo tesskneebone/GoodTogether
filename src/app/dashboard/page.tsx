@@ -94,12 +94,19 @@ export default async function DashboardPage() {
   }
 
   // Volunteer dashboard
-  const { data: signups } = await supabase
-    .from("signups")
-    .select("id, opportunity_id, opportunities(*)")
-    .eq("volunteer_id", user.id)
-    .eq("status", "confirmed")
-    .order("created_at", { ascending: false });
+  const [{ data: signups }, { data: savedOpps }] = await Promise.all([
+    supabase
+      .from("signups")
+      .select("id, opportunity_id, opportunities(*)")
+      .eq("volunteer_id", user.id)
+      .eq("status", "confirmed")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("saved_opportunities")
+      .select("opportunities(*)")
+      .eq("volunteer_id", user.id)
+      .order("created_at", { ascending: false }),
+  ]);
 
   const stats = await getVolunteerStats(supabase, user.id);
   const milestoneBadges = getMilestoneBadges(stats);
@@ -181,6 +188,25 @@ export default async function DashboardPage() {
             if (!opp) return null;
             return <OpportunityCard key={signup.id} opp={opp} />;
           })}
+        </div>
+      )}
+
+      {savedOpps && savedOpps.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold text-stone-900">Saved for later</h2>
+          <p className="mt-1 text-sm text-stone-500">
+            Imported listings you&apos;ve added to your calendar &mdash; sign up still happens on
+            the original site.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {savedOpps.map((row) => {
+              const opp = (
+                Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
+              ) as Opportunity | null;
+              if (!opp) return null;
+              return <OpportunityCard key={opp.id} opp={opp} />;
+            })}
+          </div>
         </div>
       )}
     </div>

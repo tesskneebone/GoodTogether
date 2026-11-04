@@ -12,7 +12,7 @@ export default async function CalendarPage() {
 
   if (!user) redirect("/login");
 
-  const [{ data: signups }, { data: loggedActivities }] = await Promise.all([
+  const [{ data: signups }, { data: loggedActivities }, { data: savedOpps }] = await Promise.all([
     supabase
       .from("signups")
       .select("id, opportunities(*)")
@@ -21,6 +21,10 @@ export default async function CalendarPage() {
     supabase
       .from("logged_activities")
       .select("id, title, category, occurred_at")
+      .eq("volunteer_id", user.id),
+    supabase
+      .from("saved_opportunities")
+      .select("opportunities(*)")
       .eq("volunteer_id", user.id),
   ]);
 
@@ -35,6 +39,24 @@ export default async function CalendarPage() {
         title: opp.title,
         startsAt: opp.starts_at,
         category: opp.category,
+        kind: "signup",
+        href: `/opportunities/${opp.id}`,
+      };
+    })
+    .filter((e): e is CalendarEvent => e !== null);
+
+  const savedEvents: CalendarEvent[] = (savedOpps ?? [])
+    .map((row): CalendarEvent | null => {
+      const opp = (
+        Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
+      ) as Opportunity | null;
+      if (!opp) return null;
+      return {
+        id: `saved-${opp.id}`,
+        title: opp.title,
+        startsAt: opp.starts_at,
+        category: opp.category,
+        kind: "saved",
         href: `/opportunities/${opp.id}`,
       };
     })
@@ -45,9 +67,10 @@ export default async function CalendarPage() {
     title: row.title,
     startsAt: row.occurred_at,
     category: row.category,
+    kind: "logged",
   }));
 
-  const events: CalendarEvent[] = [...signupEvents, ...loggedEvents];
+  const events: CalendarEvent[] = [...signupEvents, ...savedEvents, ...loggedEvents];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
@@ -58,11 +81,14 @@ export default async function CalendarPage() {
         </Link>
       </div>
       <p className="mt-1 text-sm text-stone-500">
-        Everything you&apos;ve signed up for or logged, past and upcoming.
+        Everything you&apos;ve signed up for, saved, or logged, past and upcoming.
       </p>
-      <div className="mt-2 flex gap-4 text-xs text-stone-500">
+      <div className="mt-2 flex flex-wrap gap-4 text-xs text-stone-500">
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-brand-200" /> Signed up (click to view)
+          <span className="h-2.5 w-2.5 rounded-full bg-brand-200" /> Signed up
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-sky-200" /> Saved (imported listing)
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-sunset-200" /> Logged activity
