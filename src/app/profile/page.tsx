@@ -1,6 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/profile-form";
+import { BadgeGrid } from "@/components/badge-grid";
+import { getVolunteerStats } from "@/lib/volunteer-stats";
+import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -18,6 +22,14 @@ export default async function ProfilePage() {
 
   if (!profile) redirect("/login");
 
+  const isVolunteer = profile.role === "volunteer";
+  const stats = isVolunteer ? await getVolunteerStats(supabase, user.id) : null;
+  const earnedBadges = stats
+    ? [...getMilestoneBadges(stats), getWeeklyBadge(stats), ...getCategoryBadges(stats)].filter(
+        (b) => b.earned
+      )
+    : [];
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-2xl font-semibold text-stone-900">Your profile</h1>
@@ -32,6 +44,31 @@ export default async function ProfilePage() {
           ? "This shows up on your public organization page \u{1F3E2}"
           : "Orgs can see your name and neighborhood when you sign up \u{1F44B}"}
       </p>
+
+      {isVolunteer && (
+        <div className="card mt-6 p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-semibold text-stone-900">Your badges</h2>
+            <Link href="/dashboard" className="text-sm font-medium text-brand-700 hover:underline">
+              See full progress &rarr;
+            </Link>
+          </div>
+          {earnedBadges.length === 0 ? (
+            <p className="mt-3 text-sm text-stone-500">
+              Sign up for an opportunity and log your first hours to start earning badges.
+            </p>
+          ) : (
+            <>
+              <p className="mt-1 text-sm text-stone-500">
+                {earnedBadges.length} badge{earnedBadges.length === 1 ? "" : "s"} earned
+              </p>
+              <div className="mt-4">
+                <BadgeGrid title="Earned" badges={earnedBadges} />
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
