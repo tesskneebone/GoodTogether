@@ -88,6 +88,12 @@ export type ActivityComment = {
   created_at: string;
 };
 
+export type CommentLike = {
+  comment_id: string;
+  liker_id: string;
+  created_at: string;
+};
+
 export type Follow = {
   follower_id: string;
   following_id: string;
@@ -201,6 +207,27 @@ export type Database = {
           {
             foreignKeyName: "activity_comments_author_id_fkey";
             columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      comment_likes: {
+        Row: CommentLike;
+        Insert: Partial<CommentLike> & { comment_id: string; liker_id: string };
+        Update: Partial<CommentLike>;
+        Relationships: [
+          {
+            foreignKeyName: "comment_likes_comment_id_fkey";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "activity_comments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "comment_likes_liker_id_fkey";
+            columns: ["liker_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];

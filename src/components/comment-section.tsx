@@ -1,13 +1,62 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addComment, deleteComment } from "@/lib/actions/comments";
+import { Heart } from "lucide-react";
+import { addComment, deleteComment, toggleCommentLike } from "@/lib/actions/comments";
 
 export interface CommentItem {
   id: string;
   authorId: string;
   authorName: string;
   body: string;
+  likeCount: number;
+  likedByMe: boolean;
+}
+
+function CommentLikeButton({
+  commentId,
+  initialCount,
+  initialLiked,
+}: {
+  commentId: string;
+  initialCount: number;
+  initialLiked: boolean;
+}) {
+  const [count, setCount] = useState(initialCount);
+  const [liked, setLiked] = useState(initialLiked);
+  const [isPending, startTransition] = useTransition();
+
+  function handleClick() {
+    if (isPending) return;
+    const prevLiked = liked;
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setCount((c) => c + (nextLiked ? 1 : -1));
+
+    startTransition(async () => {
+      const result = await toggleCommentLike(commentId);
+      if (result.error) {
+        setLiked(prevLiked);
+        setCount((c) => c - (nextLiked ? 1 : -1));
+      } else if (result.liked !== nextLiked) {
+        setLiked(result.liked);
+        setCount((c) => c + (result.liked ? 1 : -1) - (nextLiked ? 1 : -1));
+      }
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`ml-2 inline-flex items-center gap-0.5 text-xs transition ${
+        liked ? "text-sunset-600" : "text-stone-400 hover:text-sunset-500"
+      }`}
+    >
+      <Heart className={`h-3 w-3 ${liked ? "fill-sunset-500 text-sunset-500" : ""}`} aria-hidden="true" />
+      {count > 0 && count}
+    </button>
+  );
 }
 
 export function CommentSection({
@@ -35,7 +84,14 @@ export function CommentSection({
     const optimisticId = `temp-${Date.now()}`;
     setComments((c) => [
       ...c,
-      { id: optimisticId, authorId: currentUserId, authorName: currentUserName ?? "You", body },
+      {
+        id: optimisticId,
+        authorId: currentUserId,
+        authorName: currentUserName ?? "You",
+        body,
+        likeCount: 0,
+        likedByMe: false,
+      },
     ]);
     setText("");
 
@@ -59,21 +115,31 @@ export function CommentSection({
     <div className="mt-3 border-t border-stone-100 pt-3">
       {comments.length > 0 && (
         <ul className="space-y-1.5">
-          {comments.map((c) => (
-            <li key={c.id} className="text-sm">
-              <span className="font-medium text-stone-900">{c.authorName}</span>{" "}
-              <span className="text-stone-600">{c.body}</span>
-              {currentUserId === c.authorId && !c.id.startsWith("temp-") && (
-                <button
-                  type="button"
-                  onClick={() => handleDelete(c.id)}
-                  className="ml-2 text-xs text-stone-400 hover:text-red-600"
-                >
-                  Delete
-                </button>
-              )}
-            </li>
-          ))}
+          {comments.map((c) => {
+            const isTemp = c.id.startsWith("temp-");
+            return (
+              <li key={c.id} className="text-sm">
+                <span className="font-medium text-stone-900">{c.authorName}</span>{" "}
+                <span className="text-stone-600">{c.body}</span>
+                {!isTemp && (
+                  <CommentLikeButton
+                    commentId={c.id}
+                    initialCount={c.likeCount}
+                    initialLiked={c.likedByMe}
+                  />
+                )}
+                {currentUserId === c.authorId && !isTemp && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(c.id)}
+                    className="ml-2 text-xs text-stone-400 hover:text-red-600"
+                  >
+                    Delete
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 

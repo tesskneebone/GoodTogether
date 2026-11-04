@@ -195,6 +195,20 @@ export default async function FeedPage({
     for (const p of profiles ?? []) profilesById[p.id] = p;
   }
 
+  const commentIds = (commentRows ?? []).map((c) => c.id);
+  const commentLikeCountById: Record<string, number> = {};
+  const commentLikedByMe = new Set<string>();
+  if (commentIds.length > 0) {
+    const { data: likeRows } = await supabase
+      .from("comment_likes")
+      .select("comment_id, liker_id")
+      .in("comment_id", commentIds);
+    for (const l of likeRows ?? []) {
+      commentLikeCountById[l.comment_id] = (commentLikeCountById[l.comment_id] ?? 0) + 1;
+      if (user && l.liker_id === user.id) commentLikedByMe.add(l.comment_id);
+    }
+  }
+
   const commentsByKey: Record<string, CommentItem[]> = {};
   for (const c of commentRows ?? []) {
     (commentsByKey[c.activity_key] ??= []).push({
@@ -202,6 +216,8 @@ export default async function FeedPage({
       authorId: c.author_id,
       authorName: profilesById[c.author_id]?.full_name ?? "Someone",
       body: c.body,
+      likeCount: commentLikeCountById[c.id] ?? 0,
+      likedByMe: commentLikedByMe.has(c.id),
     });
   }
 
