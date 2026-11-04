@@ -1,5 +1,6 @@
 import { createRssAdapter } from "./rss";
 import { createHtmlAdapter } from "./html";
+import { createSeedAdapter } from "./seed";
 import type { ScrapeAdapter } from "@/lib/scrape/types";
 
 /**
@@ -82,4 +83,5 @@ export const ADAPTERS: ScrapeAdapter[] = [
   idealistStub,
   exampleRssAdapter,
   exampleHtmlAdapter,
+  createSeedAdapter(),
 ];
