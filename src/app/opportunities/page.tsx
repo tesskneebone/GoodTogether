@@ -55,16 +55,25 @@ export default async function OpportunitiesPage({
       .ilike("org_name", pattern);
     const matchingOrgIds = (matchingOrgs ?? []).map((o) => o.id);
 
-    const [byTitle, byDescription, byOrg] = await Promise.all([
+    const [byTitle, byDescription, bySourceName, byOrg] = await Promise.all([
       baseQuery().ilike("title", pattern),
       baseQuery().ilike("description", pattern),
+      // Imported listings (scraped from a real org's own site) have no
+      // profiles row at all -- their org's name lives in source_name, not
+      // org_id -- so this is what makes those searchable by org name.
+      baseQuery().ilike("source_name", pattern),
       matchingOrgIds.length > 0 ? baseQuery().in("org_id", matchingOrgIds) : Promise.resolve({ data: [], error: null }),
     ]);
 
-    error = byTitle.error ?? byDescription.error ?? byOrg.error ?? null;
+    error = byTitle.error ?? byDescription.error ?? bySourceName.error ?? byOrg.error ?? null;
 
     const byId = new Map<string, Opportunity>();
-    for (const row of [...(byTitle.data ?? []), ...(byDescription.data ?? []), ...(byOrg.data ?? [])]) {
+    for (const row of [
+      ...(byTitle.data ?? []),
+      ...(byDescription.data ?? []),
+      ...(bySourceName.data ?? []),
+      ...(byOrg.data ?? []),
+    ]) {
       byId.set(row.id, row);
     }
     opportunities = Array.from(byId.values());
