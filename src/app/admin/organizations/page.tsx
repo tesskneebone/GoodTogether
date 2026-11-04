@@ -82,7 +82,7 @@ export default async function AdminOrganizationsPage({
                   Signed up {new Date(org.created_at).toLocaleDateString()}
                 </p>
               </div>
-              {status === "pending" && <OrgApprovalButtons profileId={org.id} />}
+              <OrgApprovalButtons profileId={org.id} currentStatus={status} />
             </div>
           ))}
         </div>
