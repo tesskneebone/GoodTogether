@@ -24,7 +24,7 @@ export async function Nav() {
     { href: "/opportunities", label: "Browse" },
     ...(profile?.role === "org" ? [{ href: "/dashboard", label: "My Opportunities" }] : []),
     ...(profile?.role === "volunteer" ? [{ href: "/dashboard", label: "My Volunteering" }] : []),
-    { href: "/leaderboard", label: "Leaderboard" },
+    { href: "/feed", label: "Feed" },
   ];
 
   return (

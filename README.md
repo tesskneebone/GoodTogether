@@ -27,8 +27,11 @@ cause and neighborhood, and sign up.
    `002_leaderboard_views.sql` (leaderboard views), `003_profile_extras.sql`
    (age/neighborhood/avatar columns + the `avatars` storage bucket),
    `004_leaderboard_avatars.sql` (adds avatars to the leaderboard views),
-   and `005_imported_opportunities.sql` (adds support for opportunities
-   imported from external sources -- see "Importing opportunities" below).
+   `005_imported_opportunities.sql` and `006_fix_import_dedup_key.sql`
+   (support for opportunities imported from external sources -- see
+   "Importing opportunities" below), and `007_activity_feed.sql` (adds
+   `logged_activities` and `activity_kudos` for the self-logged activities
+   and the `/feed` page, and folds logged hours into the leaderboard views).
 
 3. Copy the env template and fill in the values (Supabase project URL/keys,
    optionally an Unsplash key -- see below):

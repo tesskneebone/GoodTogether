@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { VolunteerHours } from "@/types/database";
 
@@ -66,7 +67,11 @@ export default async function LeaderboardPage({
         Top volunteers by hours contributed across LA.
       </p>
       <p className="mt-1 text-xs text-stone-400">
-        Hours are self-reported based on opportunity sign-ups, not independently verified.
+        Hours are self-reported, not independently verified. Prefer a feed over a ranking?{" "}
+        <Link href="/feed" className="text-brand-700 hover:underline">
+          See the activity feed
+        </Link>
+        .
       </p>
 
       <div className="mt-6 inline-flex rounded-lg border border-stone-300 bg-white p-1 text-sm">

@@ -57,6 +57,25 @@ export type Signup = {
   created_at: string;
 };
 
+export type LoggedActivity = {
+  id: string;
+  volunteer_id: string;
+  category: OpportunityCategory;
+  title: string;
+  org_name: string | null;
+  occurred_at: string;
+  hours: number;
+  note: string | null;
+  created_at: string;
+};
+
+export type ActivityKudos = {
+  id: string;
+  giver_id: string;
+  activity_key: string;
+  created_at: string;
+};
+
 export type VolunteerHours = {
   volunteer_id: string;
   full_name: string;
@@ -110,6 +129,40 @@ export type Database = {
           {
             foreignKeyName: "signups_volunteer_id_fkey";
             columns: ["volunteer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      logged_activities: {
+        Row: LoggedActivity;
+        Insert: Partial<LoggedActivity> & {
+          volunteer_id: string;
+          category: OpportunityCategory;
+          title: string;
+          occurred_at: string;
+          hours: number;
+        };
+        Update: Partial<LoggedActivity>;
+        Relationships: [
+          {
+            foreignKeyName: "logged_activities_volunteer_id_fkey";
+            columns: ["volunteer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      activity_kudos: {
+        Row: ActivityKudos;
+        Insert: Partial<ActivityKudos> & { giver_id: string; activity_key: string };
+        Update: Partial<ActivityKudos>;
+        Relationships: [
+          {
+            foreignKeyName: "activity_kudos_giver_id_fkey";
+            columns: ["giver_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];

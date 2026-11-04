@@ -119,20 +119,26 @@ export default async function DashboardPage() {
             Opportunities you&apos;ve volunteered for.
           </p>
         </div>
-        <Link href="/dashboard/calendar" className="btn-secondary">
-          Calendar view
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/log" className="btn-secondary">
+            Log activity
+          </Link>
+          <Link href="/dashboard/calendar" className="btn-secondary">
+            Calendar view
+          </Link>
+        </div>
       </div>
 
       <div className="card mt-6 p-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-lg font-semibold text-stone-900">Your Impact</h2>
-          <Link href="/leaderboard" className="text-sm font-medium text-brand-700 hover:underline">
-            See leaderboard &rarr;
+          <Link href="/feed" className="text-sm font-medium text-brand-700 hover:underline">
+            See activity feed &rarr;
           </Link>
         </div>
         <p className="mt-1 text-xs text-stone-400">
-          Hours and badges are self-reported based on your sign-ups, not independently verified.
+          Hours and badges are self-reported based on your sign-ups and logged activities, not
+          independently verified.
         </p>
         <div className="mt-3 flex flex-wrap gap-8">
           <div>
@@ -141,7 +147,7 @@ export default async function DashboardPage() {
           </div>
           <div>
             <p className="text-3xl font-bold text-brand-700">{stats.completedCount}</p>
-            <p className="text-sm text-stone-500">opportunities completed</p>
+            <p className="text-sm text-stone-500">activities completed</p>
           </div>
           <div>
             <p className="text-3xl font-bold text-brand-700">{earnedCount}</p>
