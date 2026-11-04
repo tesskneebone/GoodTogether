@@ -27,6 +27,7 @@ export async function logActivity(formData: FormData): Promise<{ error: string |
   const occurredAt = String(formData.get("occurred_at") ?? "");
   const hours = Number(formData.get("hours"));
   const note = String(formData.get("note") ?? "").trim() || null;
+  const photoUrl = String(formData.get("photo_url") ?? "").trim() || null;
 
   if (!title) return { error: "Add a title for what you did." };
   if (!CATEGORIES.includes(category)) return { error: "Choose a category." };
@@ -51,6 +52,7 @@ export async function logActivity(formData: FormData): Promise<{ error: string |
     occurred_at: occurredAt,
     hours,
     note,
+    photo_url: photoUrl,
   });
 
   if (error) return { error: error.message };

@@ -2,9 +2,10 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Droplet } from "lucide-react";
+import { Droplet, ImagePlus, X } from "lucide-react";
 import { logActivity } from "@/lib/actions/activity-log";
 import { CATEGORIES, CATEGORY_LABELS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
 
 function todayLocal(): string {
   const d = new Date();
@@ -17,14 +18,18 @@ function daysAgoLocal(days: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export function LogActivityForm() {
+export function LogActivityForm({ userId }: { userId: string }) {
   const router = useRouter();
+  const supabase = createClient();
   const formRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState("health");
   const [title, setTitle] = useState("");
   const [hours, setHours] = useState("1");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const today = todayLocal();
   const earliest = daysAgoLocal(31);
@@ -33,6 +38,39 @@ export function LogActivityForm() {
     setCategory("health");
     setTitle("Blood donation");
     setHours("1");
+  }
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5MB.");
+      return;
+    }
+
+    setUploading(true);
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${userId}/${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("activity-photos")
+      .upload(path, file, { cacheControl: "3600" });
+
+    setUploading(false);
+
+    if (uploadError) {
+      setError(uploadError.message);
+      return;
+    }
+
+    const { data } = supabase.storage.from("activity-photos").getPublicUrl(path);
+    setPhotoUrl(data.publicUrl);
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -45,6 +83,7 @@ export function LogActivityForm() {
         setError(result.error);
       } else {
         formRef.current?.reset();
+        setPhotoUrl("");
         router.push("/feed");
         router.refresh();
       }
@@ -153,6 +192,42 @@ export function LogActivityForm() {
           Note (optional)
         </label>
         <textarea id="note" name="note" rows={3} className="input mt-1" />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-stone-700">Photo (optional)</label>
+        <input type="hidden" name="photo_url" value={photoUrl} />
+        {photoUrl ? (
+          <div className="relative mt-1 inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photoUrl} alt="" className="h-32 w-32 rounded-lg object-cover" />
+            <button
+              type="button"
+              onClick={() => setPhotoUrl("")}
+              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-stone-800 text-white"
+              aria-label="Remove photo"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="btn-secondary mt-1 inline-flex items-center gap-1.5"
+          >
+            <ImagePlus className="h-4 w-4" aria-hidden="true" />
+            {uploading ? "Uploading..." : "Add a photo"}
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoChange}
+        />
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

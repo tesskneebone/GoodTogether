@@ -34,7 +34,7 @@ export default async function LogActivityPage() {
         This is self-reported and isn&apos;t independently verified.
       </p>
       <div className="card mt-6 p-6">
-        <LogActivityForm />
+        <LogActivityForm userId={user.id} />
       </div>
     </div>
   );

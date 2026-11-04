@@ -52,6 +52,29 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         />
       </div>
 
+      <div>
+        <label className="mb-1 block text-sm font-medium text-stone-700">Username</label>
+        <div className="flex items-center">
+          <span className="rounded-l-lg border border-r-0 border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-400">
+            @
+          </span>
+          <input
+            name="username"
+            required
+            pattern="[a-z0-9_]{3,20}"
+            title="3-20 characters: lowercase letters, numbers, underscores"
+            className="input rounded-l-none"
+            defaultValue={profile.username}
+            onChange={(e) => {
+              e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+            }}
+          />
+        </div>
+        <p className="mt-1 text-xs text-stone-400">
+          Your public profile: /u/{profile.username}
+        </p>
+      </div>
+
       {profile.role === "org" ? (
         <div>
           <label className="mb-1 block text-sm font-medium text-stone-700">

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { CATEGORY_ICONS } from "@/lib/category-icons";
 import { KudosButton } from "@/components/kudos-button";
+import { CommentSection, type CommentItem } from "@/components/comment-section";
 import type { Opportunity, OpportunityCategory } from "@/types/database";
 
 interface FeedItem {
@@ -17,6 +18,7 @@ interface FeedItem {
   happenedAt: string;
   feedAt: string;
   note?: string | null;
+  photoUrl?: string | null;
 }
 
 function formatRelativeTime(iso: string): string {
@@ -31,11 +33,18 @@ function formatRelativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export default async function FeedPage() {
+export default async function FeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>;
+}) {
+  const { scope } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const showFollowingOnly = scope === "following" && !!user;
 
   const [{ data: signupRows }, { data: loggedRows }] = await Promise.all([
     supabase
@@ -68,6 +77,7 @@ export default async function FeedPage() {
         hours: Math.round(hours * 10) / 10,
         happenedAt: opp.ends_at,
         feedAt: opp.ends_at,
+        photoUrl: opp.image_url,
       };
     })
     .filter((x): x is FeedItem => x !== null);
@@ -83,11 +93,24 @@ export default async function FeedPage() {
     happenedAt: row.occurred_at,
     feedAt: row.created_at,
     note: row.note,
+    photoUrl: row.photo_url,
   }));
 
-  const combined = [...signupItems, ...loggedItems]
-    .sort((a, b) => new Date(b.feedAt).getTime() - new Date(a.feedAt).getTime())
-    .slice(0, 50);
+  let combined = [...signupItems, ...loggedItems].sort(
+    (a, b) => new Date(b.feedAt).getTime() - new Date(a.feedAt).getTime()
+  );
+
+  if (showFollowingOnly && user) {
+    const { data: followingRows } = await supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", user.id);
+    const followingIds = new Set((followingRows ?? []).map((f) => f.following_id));
+    followingIds.add(user.id);
+    combined = combined.filter((i) => followingIds.has(i.volunteerId));
+  }
+
+  combined = combined.slice(0, 50);
 
   // Resolve org names for signup-derived items (always native, so org_id
   // is always set -- imported listings never get a GoodTogether signup).
@@ -104,19 +127,40 @@ export default async function FeedPage() {
     }
   }
 
-  const volunteerIds = Array.from(new Set(combined.map((i) => i.volunteerId)));
-  const profilesById: Record<string, { full_name: string; avatar_url: string | null }> = {};
-  if (volunteerIds.length > 0) {
+  const keys = combined.map((i) => i.key);
+
+  const { data: commentRows } = keys.length
+    ? await supabase
+        .from("activity_comments")
+        .select("id, activity_key, author_id, body")
+        .in("activity_key", keys)
+        .order("created_at", { ascending: true })
+    : { data: [] };
+
+  const profileIds = Array.from(
+    new Set([...combined.map((i) => i.volunteerId), ...(commentRows ?? []).map((c) => c.author_id)])
+  );
+  const profilesById: Record<string, { full_name: string; username: string; avatar_url: string | null }> = {};
+  if (profileIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url")
-      .in("id", volunteerIds);
+      .select("id, full_name, username, avatar_url")
+      .in("id", profileIds);
     for (const p of profiles ?? []) profilesById[p.id] = p;
+  }
+
+  const commentsByKey: Record<string, CommentItem[]> = {};
+  for (const c of commentRows ?? []) {
+    (commentsByKey[c.activity_key] ??= []).push({
+      id: c.id,
+      authorId: c.author_id,
+      authorName: profilesById[c.author_id]?.full_name ?? "Someone",
+      body: c.body,
+    });
   }
 
   const kudosCountByKey: Record<string, number> = {};
   const givenByMe = new Set<string>();
-  const keys = combined.map((i) => i.key);
   if (keys.length > 0) {
     const { data: kudosRows } = await supabase
       .from("activity_kudos")
@@ -127,6 +171,8 @@ export default async function FeedPage() {
       if (user && k.giver_id === user.id) givenByMe.add(k.activity_key);
     }
   }
+
+  const currentUserName = user ? profilesById[user.id]?.full_name ?? null : null;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
@@ -148,21 +194,49 @@ export default async function FeedPage() {
         Log activity
       </Link>
 
-      <p className="mt-3 text-xs text-stone-400">
-        Hours are self-reported, not independently verified. Want the ranked view instead?{" "}
-        <Link href="/leaderboard" className="text-brand-700 hover:underline">
-          See the leaderboard
-        </Link>
-        .
-      </p>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+        {user ? (
+          <div className="inline-flex rounded-lg border border-stone-300 bg-white p-1 text-sm">
+            <Link
+              href="/feed"
+              className={`rounded-md px-3 py-1.5 font-medium transition ${
+                !showFollowingOnly ? "bg-brand-600 text-white" : "text-stone-600 hover:bg-stone-50"
+              }`}
+            >
+              Everyone
+            </Link>
+            <Link
+              href="/feed?scope=following"
+              className={`rounded-md px-3 py-1.5 font-medium transition ${
+                showFollowingOnly ? "bg-brand-600 text-white" : "text-stone-600 hover:bg-stone-50"
+              }`}
+            >
+              Following
+            </Link>
+          </div>
+        ) : (
+          <span />
+        )}
+        <p className="text-xs text-stone-400">
+          Self-reported, not independently verified.{" "}
+          <Link href="/leaderboard" className="text-brand-700 hover:underline">
+            See the leaderboard
+          </Link>
+          .
+        </p>
+      </div>
 
       {combined.length === 0 ? (
         <div className="card mt-8 p-8 text-center text-stone-500">
-          No activity yet. Sign up for an opportunity or{" "}
-          <Link href="/log" className="text-brand-700 hover:underline">
-            log one
-          </Link>{" "}
-          to get the feed started.
+          {showFollowingOnly
+            ? "Nobody you follow has logged anything yet."
+            : "No activity yet. Sign up for an opportunity or"}{" "}
+          {!showFollowingOnly && (
+            <Link href="/log" className="text-brand-700 hover:underline">
+              log one
+            </Link>
+          )}
+          {!showFollowingOnly && " to get the feed started."}
         </div>
       ) : (
         <ol className="mt-6 space-y-3">
@@ -172,23 +246,28 @@ export default async function FeedPage() {
             return (
               <li key={item.key} className="card p-5">
                 <div className="flex items-start gap-3">
-                  {profile?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={profile.avatar_url}
-                      alt=""
-                      className="h-10 w-10 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sunset-100 text-sm font-semibold text-sunset-700">
-                      {profile?.full_name?.[0]?.toUpperCase() ?? "?"}
-                    </span>
-                  )}
+                  <Link href={profile ? `/u/${profile.username}` : "#"} className="shrink-0">
+                    {profile?.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={profile.avatar_url}
+                        alt=""
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sunset-100 text-sm font-semibold text-sunset-700">
+                        {profile?.full_name?.[0]?.toUpperCase() ?? "?"}
+                      </span>
+                    )}
+                  </Link>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-stone-700">
-                      <span className="font-semibold text-stone-900">
+                      <Link
+                        href={profile ? `/u/${profile.username}` : "#"}
+                        className="font-semibold text-stone-900 hover:underline"
+                      >
                         {profile?.full_name ?? "Someone"}
-                      </span>{" "}
+                      </Link>{" "}
                       logged{" "}
                       <span className="font-medium">
                         {item.hours} hr{item.hours === 1 ? "" : "s"}
@@ -202,6 +281,14 @@ export default async function FeedPage() {
                     </p>
                     {item.note && (
                       <p className="mt-1 text-sm italic text-stone-500">&ldquo;{item.note}&rdquo;</p>
+                    )}
+                    {item.photoUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.photoUrl}
+                        alt=""
+                        className="mt-2 max-h-72 w-full rounded-lg object-cover"
+                      />
                     )}
                     <div className="mt-2 flex items-center justify-between">
                       <span className="inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">
@@ -219,6 +306,12 @@ export default async function FeedPage() {
                     isLoggedIn={!!user}
                   />
                 </div>
+                <CommentSection
+                  activityKey={item.key}
+                  initialComments={commentsByKey[item.key] ?? []}
+                  currentUserId={user?.id ?? null}
+                  currentUserName={currentUserName}
+                />
               </li>
             );
           })}

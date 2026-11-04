@@ -25,8 +25,20 @@ export async function updateProfile(
   const neighborhood = String(formData.get("neighborhood") ?? "").trim();
   const avatarUrl = String(formData.get("avatar_url") ?? "").trim();
   const ageRaw = String(formData.get("age") ?? "").trim();
+  const username = String(formData.get("username") ?? "").trim().toLowerCase();
 
   if (!fullName) return { error: "Name is required." };
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+    return { error: "Username must be 3-20 characters: lowercase letters, numbers, underscores." };
+  }
+
+  const { data: usernameTaken } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .neq("id", user.id)
+    .maybeSingle();
+  if (usernameTaken) return { error: "That username is already taken." };
 
   let age: number | null = null;
   if (ageRaw) {
@@ -40,6 +52,7 @@ export async function updateProfile(
     .from("profiles")
     .update({
       full_name: fullName,
+      username,
       org_name: orgName || null,
       bio: bio || null,
       neighborhood: neighborhood || null,
@@ -48,7 +61,10 @@ export async function updateProfile(
     })
     .eq("id", user.id);
 
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.code === "23505") return { error: "That username is already taken." };
+    return { error: error.message };
+  }
 
   revalidatePath("/profile");
   revalidatePath("/dashboard");

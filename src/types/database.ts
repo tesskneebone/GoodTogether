@@ -18,6 +18,7 @@ export type SignupStatus = "confirmed" | "cancelled";
 export type Profile = {
   id: string;
   role: UserRole;
+  username: string;
   full_name: string;
   org_name: string | null;
   bio: string | null;
@@ -66,6 +67,7 @@ export type LoggedActivity = {
   occurred_at: string;
   hours: number;
   note: string | null;
+  photo_url: string | null;
   created_at: string;
 };
 
@@ -73,6 +75,20 @@ export type ActivityKudos = {
   id: string;
   giver_id: string;
   activity_key: string;
+  created_at: string;
+};
+
+export type ActivityComment = {
+  id: string;
+  activity_key: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+export type Follow = {
+  follower_id: string;
+  following_id: string;
   created_at: string;
 };
 
@@ -88,7 +104,7 @@ export type Database = {
     Tables: {
       profiles: {
         Row: Profile;
-        Insert: Partial<Profile> & { id: string; role: UserRole; full_name: string };
+        Insert: Partial<Profile> & { id: string; role: UserRole; full_name: string; username?: string };
         Update: Partial<Profile>;
         Relationships: [];
       };
@@ -163,6 +179,41 @@ export type Database = {
           {
             foreignKeyName: "activity_kudos_giver_id_fkey";
             columns: ["giver_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      activity_comments: {
+        Row: ActivityComment;
+        Insert: Partial<ActivityComment> & { activity_key: string; author_id: string; body: string };
+        Update: Partial<ActivityComment>;
+        Relationships: [
+          {
+            foreignKeyName: "activity_comments_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      follows: {
+        Row: Follow;
+        Insert: Partial<Follow> & { follower_id: string; following_id: string };
+        Update: Partial<Follow>;
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_id_fkey";
+            columns: ["follower_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey";
+            columns: ["following_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
