@@ -1,24 +1,10 @@
 export function Logo({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 142 111"
-      className={className}
-      fill="none"
-      stroke="#1e8a96"
-      strokeWidth={6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M18,108 C15,90 13,65 15,42 C16,33 20,26 26,21 C30,18 36,16 39,20 C41,23 39,28 34,32 C29,35 24,36 24,41 C24,48 34,58 45,68 C55,77 63,90 70,108" />
-      <path d="M22,58 C20,50 25,44 32,46 C38,48 40,55 35,60 C31,64 24,64 22,58 Z" />
-      <path d="M124,108 C127,90 129,65 127,42 C126,33 122,26 116,21 C112,18 106,16 103,20 C101,23 103,28 108,32 C113,35 118,36 118,41 C118,48 108,58 97,68 C87,77 79,90 72,108" />
-      <path d="M120,58 C122,50 117,44 110,46 C104,48 102,55 107,60 C111,64 118,64 120,58 Z" />
-      <path
-        d="M71,68 C55,55 32,42 32,24 C32,13 41,5 52,8 C58,10 63,14 71,24 C79,14 84,10 90,8 C101,5 110,13 110,24 C110,42 87,55 71,68 Z"
-        fill="#1e8a96"
-        stroke="none"
-      />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo-source.png"
+      alt="GoodTogether LA"
+      className={`${className} rounded-md object-contain`}
+    />
   );
 }
