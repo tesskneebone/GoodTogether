@@ -10,6 +10,7 @@ import { createMendAdapter } from "./mend";
 import { createSchoolOnWheelsAdapter } from "./school-on-wheels";
 import { createMidnightMissionAdapter } from "./midnight-mission";
 import { createUrmAdapter } from "./urm";
+import { createLaWorksAdapter } from "./la-works";
 import type { ScrapeAdapter } from "@/lib/scrape/types";
 
 /**
@@ -102,6 +103,7 @@ const realAdapters: ScrapeAdapter[] = [
   createSchoolOnWheelsAdapter(),
   createMidnightMissionAdapter(),
   createUrmAdapter(),
+  createLaWorksAdapter(),
 ];
 
 export const ADAPTERS: ScrapeAdapter[] = [
