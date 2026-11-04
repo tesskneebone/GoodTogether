@@ -5,6 +5,9 @@ import { createHealTheBayAdapter } from "./heal-the-bay";
 import { createPvplcAdapter } from "./pvplc";
 import { createBallonaWetlandsAdapter } from "./ballona-wetlands";
 import { createFolarAdapter } from "./folar";
+import { createFoodForwardAdapter } from "./food-forward";
+import { createMendAdapter } from "./mend";
+import { createSchoolOnWheelsAdapter } from "./school-on-wheels";
 import type { ScrapeAdapter } from "@/lib/scrape/types";
 
 /**
@@ -92,6 +95,9 @@ const realAdapters: ScrapeAdapter[] = [
   createPvplcAdapter(),
   createBallonaWetlandsAdapter(),
   createFolarAdapter(),
+  createFoodForwardAdapter(),
+  createMendAdapter(),
+  createSchoolOnWheelsAdapter(),
 ];
 
 export const ADAPTERS: ScrapeAdapter[] = [
