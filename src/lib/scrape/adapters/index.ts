@@ -8,6 +8,8 @@ import { createFolarAdapter } from "./folar";
 import { createFoodForwardAdapter } from "./food-forward";
 import { createMendAdapter } from "./mend";
 import { createSchoolOnWheelsAdapter } from "./school-on-wheels";
+import { createMidnightMissionAdapter } from "./midnight-mission";
+import { createUrmAdapter } from "./urm";
 import type { ScrapeAdapter } from "@/lib/scrape/types";
 
 /**
@@ -98,6 +100,8 @@ const realAdapters: ScrapeAdapter[] = [
   createFoodForwardAdapter(),
   createMendAdapter(),
   createSchoolOnWheelsAdapter(),
+  createMidnightMissionAdapter(),
+  createUrmAdapter(),
 ];
 
 export const ADAPTERS: ScrapeAdapter[] = [
