@@ -15,8 +15,22 @@ export interface ImportSummary {
 // run doesn't hammer Unsplash's rate limit or run every adapter's own
 // network calls fully in parallel, but high enough that the whole import
 // comfortably finishes inside the cron route's time budget.
-const ADAPTER_CONCURRENCY = 4;
+const ADAPTER_CONCURRENCY = 6;
 const PHOTO_LOOKUP_CONCURRENCY = 5;
+
+// Upper bound on any one source's fetch. A source whose server hangs
+// (seen with Galaxy Digital hosts answering 504 after ~60s) would
+// otherwise hold its worker for the entire cron budget and get the whole
+// run killed -- losing every other source's results along with it.
+const ADAPTER_FETCH_TIMEOUT_MS = 15_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`timed out after ${ms / 1000}s`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -31,7 +45,7 @@ async function importAdapter(adapter: ScrapeAdapter, supabase: AdminClient): Pro
 
   let items: ScrapedOpportunity[];
   try {
-    items = await adapter.fetch();
+    items = await withTimeout(adapter.fetch(), ADAPTER_FETCH_TIMEOUT_MS);
   } catch (err) {
     summary.errors.push(`fetch failed: ${err instanceof Error ? err.message : String(err)}`);
     return summary;

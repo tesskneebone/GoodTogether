@@ -13,8 +13,55 @@ const FULL_MONTHS: Record<string, number> = {
   july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
 };
 
-function findNeighborhood(text: string): string {
-  const lower = text.toLowerCase();
+// Drives are mostly at schools and churches across the county, in cities
+// that aren't in LA_NEIGHBORHOODS -- map each to the nearest region we do
+// have so they don't all collapse onto the "West LA" fallback.
+const CITY_REGIONS: Record<string, string> = {
+  "redondo beach": "South Bay",
+  "manhattan beach": "South Bay",
+  "hermosa beach": "South Bay",
+  "el segundo": "South Bay",
+  hawthorne: "South Bay",
+  torrance: "South Bay",
+  "harbor city": "South Bay",
+  wilmington: "South Bay",
+  "san pedro": "South Bay",
+  "beverly hills": "West LA",
+  "west hollywood": "Hollywood",
+  "stevenson ranch": "San Fernando Valley",
+  "canyon country": "San Fernando Valley",
+  valencia: "San Fernando Valley",
+  "santa clarita": "San Fernando Valley",
+  "san fernando": "San Fernando Valley",
+  pacoima: "San Fernando Valley",
+  "woodland hills": "San Fernando Valley",
+  "west hills": "San Fernando Valley",
+  "oak park": "San Fernando Valley",
+  lynwood: "South LA",
+  "south gate": "South LA",
+  compton: "South LA",
+  "long beach": "Long Beach",
+};
+
+// "Los Angeles" alone covers the whole city; narrow it by ZIP.
+const LA_ZIP_REGIONS: Record<string, string> = {
+  "90012": "Downtown LA",
+  "90013": "Downtown LA",
+  "90014": "Downtown LA",
+  "90015": "Downtown LA",
+  "90017": "Downtown LA",
+  "90071": "Downtown LA",
+  "90045": "Playa del Rey",
+  "90095": "West LA",
+  "90024": "West LA",
+  "90025": "West LA",
+};
+
+function findNeighborhood(city: string | undefined, zip: string | undefined, text: string): string {
+  const cityKey = city?.trim().toLowerCase();
+  if (cityKey && CITY_REGIONS[cityKey]) return CITY_REGIONS[cityKey];
+  if (zip && LA_ZIP_REGIONS[zip]) return LA_ZIP_REGIONS[zip];
+  const lower = `${city ?? ""} ${text}`.toLowerCase();
   return LA_NEIGHBORHOODS.find((n) => lower.includes(n.toLowerCase())) ?? "West LA";
 }
 
@@ -54,16 +101,29 @@ export function createUclaBloodAdapter(): ScrapeAdapter {
         if (!yearMatch) return;
         const year = Number(yearMatch[1]);
 
-        const prose = $(headingEl).nextAll("div.prose").first();
+        // The month's drives live in a wrapper next to the heading
+        // (<h2/> + <div class="mt-3"><div><div class="prose">), not in a
+        // direct sibling, so search the heading's parent block.
+        const prose = $(headingEl).parent().find("div.prose").first();
         if (prose.length === 0) return;
 
         prose.find("p").each((_, pEl) => {
           const p = $(pEl);
-          const text = p.text().replace(/ /g, " ").replace(/\s+/g, " ").trim();
+          // Fields are separated only by <br>; keep them on separate lines
+          // so e.g. "...1:30pm" doesn't run into "Torrance, CA 90504".
+          p.find("br").replaceWith("\n");
+          const lines = p
+            .text()
+            .split("\n")
+            .map((line) => line.replace(/\s+/g, " ").trim())
+            .filter(Boolean);
+          const text = lines.join(" ");
 
           const link = p.find("a").first();
           const sourceUrl = link.attr("href")?.trim();
-          const title = link.find("strong").first().text().trim() || link.text().trim();
+          // Whole link text, not just its <strong>: the markup sometimes
+          // splits a name across tags ("<strong>...Schoo</strong>l").
+          const title = link.text().replace(/\s+/g, " ").trim();
 
           const dateStrong = p.find("strong").first().text().trim();
           const dateMatch = dateStrong.match(/([A-Za-z]+)\s+(\d{1,2})/);
@@ -88,8 +148,12 @@ export function createUclaBloodAdapter(): ScrapeAdapter {
             ? laTimeToUtc(year, month, day, end.hour, end.minute)
             : new Date(startsAt.getTime() + 3600_000);
 
-          const codeMatch = text.match(/Code:\s*([A-Za-z0-9]+)/i);
-          const locationMatch = text.match(/([A-Za-z .'-]+),\s*CA\s*(\d{5})/);
+          // Codes can be multi-word ("UCLA WVMC", "POWER TO HELP"), so take
+          // the rest of the line rather than one token.
+          const codeMatch = lines.map((line) => line.match(/^Code:\s*(.+)$/i)).find(Boolean);
+          const locationMatch = lines
+            .map((line) => line.match(/^([A-Za-z .'-]+),\s*CA\s*(\d{5})$/))
+            .find(Boolean);
 
           const description = codeMatch
             ? `Community blood drive hosted by ${title}. Use booking code ${codeMatch[1]} when you sign up.`
@@ -100,7 +164,8 @@ export function createUclaBloodAdapter(): ScrapeAdapter {
             title: `Blood Drive: ${title}`,
             description,
             category: "health",
-            neighborhood: findNeighborhood(locationMatch ? locationMatch[1] : text),
+            neighborhood: findNeighborhood(locationMatch?.[1], locationMatch?.[2], text),
+            address: locationMatch ? `${locationMatch[1].trim()}, CA ${locationMatch[2]}` : undefined,
             startsAt: startsAt.toISOString(),
             endsAt: endsAt.toISOString(),
             sourceUrl,
