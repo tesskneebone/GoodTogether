@@ -76,6 +76,7 @@ export function getWeeklyBadge(stats: VolunteerStats): Badge {
   return {
     id: "weekly-warrior",
     emoji: "\u{1F3C3}",
+    icon: "/badges/weekly-warrior.png",
     label: "Weekly Warrior",
     description: `Volunteer ${WEEKLY_TARGET_HOURS}+ hours this week`,
     earned: stats.hoursThisWeek >= WEEKLY_TARGET_HOURS,
