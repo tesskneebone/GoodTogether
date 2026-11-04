@@ -144,8 +144,8 @@ export default async function DashboardPage() {
           </Link>
         </div>
         <p className="mt-1 text-xs text-stone-400">
-          Hours and badges are self-reported based on your sign-ups and logged activities, not
-          independently verified.
+          Hours and badges are self-reported based on your sign-ups, imported listings you&apos;ve
+          marked as signed up, and logged activities &mdash; not independently verified.
         </p>
         <div className="mt-3 flex flex-wrap gap-8">
           <div>
@@ -193,10 +193,10 @@ export default async function DashboardPage() {
 
       {savedOpps && savedOpps.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-lg font-semibold text-stone-900">Saved for later</h2>
+          <h2 className="text-lg font-semibold text-stone-900">Signed up elsewhere</h2>
           <p className="mt-1 text-sm text-stone-500">
-            Imported listings you&apos;ve added to your calendar &mdash; sign up still happens on
-            the original site.
+            Imported listings you&apos;ve marked as signed up &mdash; once they&apos;re done, they&apos;ll
+            count toward your hours.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {savedOpps.map((row) => {

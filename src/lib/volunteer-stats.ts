@@ -25,7 +25,7 @@ export async function getVolunteerStats(
   // Filtering on ends_at happens in JS below rather than via PostgREST's
   // embedded-resource filter syntax, which nulls out non-matching embeds
   // instead of excluding the parent row.
-  const [{ data: signupRows }, { data: loggedRows }] = await Promise.all([
+  const [{ data: signupRows }, { data: loggedRows }, { data: savedRows }] = await Promise.all([
     supabase
       .from("signups")
       .select("opportunities(category, starts_at, ends_at)")
@@ -34,6 +34,13 @@ export async function getVolunteerStats(
     supabase
       .from("logged_activities")
       .select("category, hours, occurred_at")
+      .eq("volunteer_id", volunteerId),
+    // A saved imported opportunity represents "I signed up for this (on
+    // the source site)" -- once it's over, it counts the same as a
+    // native signup.
+    supabase
+      .from("saved_opportunities")
+      .select("opportunities(category, starts_at, ends_at)")
       .eq("volunteer_id", volunteerId),
   ]);
 
@@ -46,16 +53,13 @@ export async function getVolunteerStats(
 
   type OppSlice = { category: OpportunityCategory; starts_at: string; ends_at: string };
 
-  for (const row of signupRows ?? []) {
-    const opp = (
-      Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
-    ) as OppSlice | null;
-    if (!opp || !opp.ends_at || !opp.starts_at) continue;
-    if (new Date(opp.ends_at) >= new Date()) continue;
+  function addCompletedOpportunity(opp: OppSlice | null) {
+    if (!opp || !opp.ends_at || !opp.starts_at) return;
+    if (new Date(opp.ends_at) >= new Date()) return;
 
     const hours =
       (new Date(opp.ends_at).getTime() - new Date(opp.starts_at).getTime()) / 3600000;
-    if (hours <= 0) continue;
+    if (hours <= 0) return;
 
     totalHours += hours;
     completedCount += 1;
@@ -64,6 +68,20 @@ export async function getVolunteerStats(
     if (new Date(opp.starts_at) >= weekStart) {
       hoursThisWeek += hours;
     }
+  }
+
+  for (const row of signupRows ?? []) {
+    const opp = (
+      Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
+    ) as OppSlice | null;
+    addCompletedOpportunity(opp);
+  }
+
+  for (const row of savedRows ?? []) {
+    const opp = (
+      Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
+    ) as OppSlice | null;
+    addCompletedOpportunity(opp);
   }
 
   for (const row of loggedRows ?? []) {

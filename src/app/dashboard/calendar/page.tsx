@@ -81,14 +81,14 @@ export default async function CalendarPage() {
         </Link>
       </div>
       <p className="mt-1 text-sm text-stone-500">
-        Everything you&apos;ve signed up for, saved, or logged, past and upcoming.
+        Everything you&apos;ve signed up for or logged, past and upcoming.
       </p>
       <div className="mt-2 flex flex-wrap gap-4 text-xs text-stone-500">
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-brand-200" /> Signed up
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-sky-200" /> Saved (imported listing)
+          <span className="h-2.5 w-2.5 rounded-full bg-sky-200" /> Signed up (imported)
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-sunset-200" /> Logged activity

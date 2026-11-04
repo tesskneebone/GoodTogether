@@ -161,7 +161,8 @@ export default async function OpportunityDetailPage({
         <div className="card mt-8 flex flex-col gap-3 p-5">
           <p className="text-sm text-stone-600">
             Signups for this opportunity happen on {opp.source_name ?? "the original site"}.
-            Planning to go? Add it to your calendar so you don&apos;t forget.
+            Already signed up there? Mark it here so it shows on your calendar and counts
+            toward your hours once it&apos;s done.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             {opp.source_url && (

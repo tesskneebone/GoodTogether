@@ -48,7 +48,7 @@ export default async function FeedPage({
 
   const showFollowingOnly = scope === "following" && !!user;
 
-  const [{ data: signupRows }, { data: loggedRows }] = await Promise.all([
+  const [{ data: signupRows }, { data: loggedRows }, { data: savedRows }] = await Promise.all([
     supabase
       .from("signups")
       .select("id, volunteer_id, opportunities(*)")
@@ -58,6 +58,14 @@ export default async function FeedPage({
     supabase
       .from("logged_activities")
       .select("*")
+      .order("created_at", { ascending: false })
+      .limit(60),
+    // A saved imported opportunity means "I signed up for this on the
+    // source site" -- once it's over, it shows in the feed like any
+    // other completed activity.
+    supabase
+      .from("saved_opportunities")
+      .select("volunteer_id, created_at, opportunities(*)")
       .order("created_at", { ascending: false })
       .limit(60),
   ]);
@@ -84,6 +92,28 @@ export default async function FeedPage({
     })
     .filter((x): x is FeedItem => x !== null);
 
+  const signedUpImportedItems: FeedItem[] = (savedRows ?? [])
+    .map((row): FeedItem | null => {
+      const opp = (
+        Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
+      ) as Opportunity | null;
+      if (!opp || new Date(opp.ends_at) >= new Date()) return null;
+      const hours = (new Date(opp.ends_at).getTime() - new Date(opp.starts_at).getTime()) / 3600000;
+      return {
+        key: `saved:${opp.id}`,
+        volunteerId: row.volunteer_id,
+        category: opp.category,
+        title: opp.title,
+        orgName: opp.source_name,
+        orgId: null,
+        hours: Math.round(hours * 10) / 10,
+        happenedAt: opp.ends_at,
+        feedAt: opp.ends_at,
+        photoUrl: opp.image_url,
+      };
+    })
+    .filter((x): x is FeedItem => x !== null);
+
   const loggedItems: FeedItem[] = (loggedRows ?? []).map((row) => ({
     key: `manual:${row.id}`,
     volunteerId: row.volunteer_id,
@@ -100,7 +130,7 @@ export default async function FeedPage({
     editHref: user && row.volunteer_id === user.id ? `/log/${row.id}` : undefined,
   }));
 
-  let combined = [...signupItems, ...loggedItems].sort(
+  let combined = [...signupItems, ...signedUpImportedItems, ...loggedItems].sort(
     (a, b) => new Date(b.feedAt).getTime() - new Date(a.feedAt).getTime()
   );
 

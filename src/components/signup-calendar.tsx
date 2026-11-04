@@ -17,7 +17,7 @@ export interface CalendarEvent {
 
 const KIND_STYLES: Record<CalendarEvent["kind"], { pill: string; label: string }> = {
   signup: { pill: "bg-brand-100 text-brand-800 hover:bg-brand-200", label: "signed up" },
-  saved: { pill: "bg-sky-100 text-sky-800 hover:bg-sky-200", label: "saved" },
+  saved: { pill: "bg-sky-100 text-sky-800 hover:bg-sky-200", label: "signed up elsewhere" },
   logged: { pill: "bg-sunset-100 text-sunset-800", label: "logged" },
 };
 
