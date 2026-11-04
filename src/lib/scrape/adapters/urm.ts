@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import { laTimeToUtc, parse12HourTime } from "@/lib/scrape/la-time";
 import { isPathAllowed, BOT_USER_AGENT } from "@/lib/scrape/robots";
+import { mapWithConcurrency } from "@/lib/scrape/concurrency";
 import type { ScrapeAdapter, ScrapedOpportunity } from "@/lib/scrape/types";
 
 const LIST_URL =
@@ -116,12 +117,13 @@ export function createUrmAdapter(): ScrapeAdapter {
         programs.set(eventId, { title, url });
       });
 
-      const opportunities: ScrapedOpportunity[] = [];
-      for (const { title, url } of programs.values()) {
-        opportunities.push(...(await fetchProgramSlots(url, title)));
-      }
+      const perProgram = await mapWithConcurrency(
+        Array.from(programs.values()),
+        5,
+        ({ title, url }) => fetchProgramSlots(url, title)
+      );
 
-      return opportunities;
+      return perProgram.flat();
     },
   };
 }

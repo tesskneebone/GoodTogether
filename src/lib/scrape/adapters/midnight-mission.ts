@@ -6,6 +6,11 @@ import type { ScrapeAdapter, ScrapedOpportunity } from "@/lib/scrape/types";
 const LIST_URL = "https://midnightmission.galaxydigital.com/need/";
 const USER_AGENT = `${BOT_USER_AGENT}/1.0 (+https://goodtogether.vercel.app)`;
 
+// The calendar renders the whole current month -- dozens of shifts a day
+// across many recurring needs. Capped to the next two weeks so one source
+// doesn't dominate the import's volume (and runtime).
+const HORIZON_MS = 14 * 24 * 3600_000;
+
 const MONTHS: Record<string, number> = {
   january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
   july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
@@ -43,6 +48,7 @@ export function createMidnightMissionAdapter(): ScrapeAdapter {
       const $ = cheerio.load(html);
 
       const opportunities: ScrapedOpportunity[] = [];
+      const horizon = Date.now() + HORIZON_MS;
 
       $("ul.calendar-content").each((_, dayEl) => {
         const $day = $(dayEl);
@@ -65,6 +71,7 @@ export function createMidnightMissionAdapter(): ScrapeAdapter {
           const end = endRaw ? parse12HourTime(endRaw) : null;
 
           const startsAt = laTimeToUtc(date.year, date.month, date.day, start.hour, start.minute);
+          if (startsAt.getTime() > horizon || startsAt.getTime() < Date.now() - 3600_000) return;
           const endsAt = end
             ? laTimeToUtc(date.year, date.month, date.day, end.hour, end.minute)
             : new Date(startsAt.getTime() + 3 * 3600_000);
