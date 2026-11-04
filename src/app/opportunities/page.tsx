@@ -21,24 +21,62 @@ export default async function OpportunitiesPage({
   const { category, neighborhood, q, from, to, sort } = await searchParams;
   const supabase = await createClient();
   const sortOption: SortOption = sort === "spots" ? "spots" : "soonest";
+  const trimmedQuery = q?.trim() ?? "";
 
-  let query = supabase
-    .from("opportunities")
-    .select("*")
-    .gte("starts_at", from ? new Date(from).toISOString() : new Date().toISOString())
-    .order("starts_at", { ascending: true });
+  // Returns a fresh query with the non-text filters applied, so it can be
+  // reused as the starting point for several separate text-match queries
+  // below (rather than building one .or() string from user input -- see
+  // the same pattern, and why, on the /people search page).
+  function baseQuery() {
+    let builder = supabase
+      .from("opportunities")
+      .select("*")
+      .gte("starts_at", from ? new Date(from).toISOString() : new Date().toISOString());
 
-  if (category) {
-    const categories = category.split(",") as OpportunityCategory[];
-    query = categories.length > 1 ? query.in("category", categories) : query.eq("category", categories[0]);
+    if (category) {
+      const categories = category.split(",") as OpportunityCategory[];
+      builder =
+        categories.length > 1 ? builder.in("category", categories) : builder.eq("category", categories[0]);
+    }
+    if (neighborhood) builder = builder.eq("neighborhood", neighborhood);
+    if (to) builder = builder.lte("starts_at", new Date(`${to}T23:59:59`).toISOString());
+    return builder;
   }
-  if (neighborhood) query = query.eq("neighborhood", neighborhood);
-  if (to) query = query.lte("starts_at", new Date(`${to}T23:59:59`).toISOString());
-  if (q) query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
 
-  const { data, error } = await query;
+  let opportunities: Opportunity[] = [];
+  let error: { message: string } | null = null;
 
-  const opportunities: Opportunity[] = data ?? [];
+  if (trimmedQuery) {
+    const pattern = `%${trimmedQuery}%`;
+    const { data: matchingOrgs } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "org")
+      .ilike("org_name", pattern);
+    const matchingOrgIds = (matchingOrgs ?? []).map((o) => o.id);
+
+    const [byTitle, byDescription, byOrg] = await Promise.all([
+      baseQuery().ilike("title", pattern),
+      baseQuery().ilike("description", pattern),
+      matchingOrgIds.length > 0 ? baseQuery().in("org_id", matchingOrgIds) : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    error = byTitle.error ?? byDescription.error ?? byOrg.error ?? null;
+
+    const byId = new Map<string, Opportunity>();
+    for (const row of [...(byTitle.data ?? []), ...(byDescription.data ?? []), ...(byOrg.data ?? [])]) {
+      byId.set(row.id, row);
+    }
+    opportunities = Array.from(byId.values());
+  } else {
+    const { data, error: queryError } = await baseQuery();
+    opportunities = data ?? [];
+    error = queryError;
+  }
+
+  opportunities.sort(
+    (a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+  );
   if (sortOption === "spots") {
     opportunities.sort(
       (a, b) => b.spots_total - b.spots_filled - (a.spots_total - a.spots_filled)
