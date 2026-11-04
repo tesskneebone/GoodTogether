@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search, MapPin, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { CATEGORY_ICONS } from "@/lib/category-icons";
@@ -19,6 +19,8 @@ interface FeedItem {
   feedAt: string;
   note?: string | null;
   photoUrl?: string | null;
+  location?: string | null;
+  editHref?: string;
 }
 
 function formatRelativeTime(iso: string): string {
@@ -94,6 +96,8 @@ export default async function FeedPage({
     feedAt: row.created_at,
     note: row.note,
     photoUrl: row.photo_url,
+    location: row.location,
+    editHref: user && row.volunteer_id === user.id ? `/log/${row.id}` : undefined,
   }));
 
   let combined = [...signupItems, ...loggedItems].sort(
@@ -303,6 +307,12 @@ export default async function FeedPage({
                       {item.title}
                       {item.orgName && <span> &middot; {item.orgName}</span>}
                     </p>
+                    {item.location && (
+                      <p className="mt-0.5 flex items-center gap-1.5 text-sm text-stone-500">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {item.location}
+                      </p>
+                    )}
                     {item.note && (
                       <p className="mt-1 text-sm italic text-stone-500">&ldquo;{item.note}&rdquo;</p>
                     )}
@@ -322,7 +332,15 @@ export default async function FeedPage({
                     </div>
                   </div>
                 </div>
-                <div className="mt-3 flex justify-end">
+                <div className="mt-3 flex items-center justify-end gap-2">
+                  {item.editHref && (
+                    <Link
+                      href={item.editHref}
+                      className="flex items-center gap-1 rounded-full border border-stone-200 px-3 py-1 text-sm font-medium text-stone-500 transition hover:border-stone-300 hover:text-stone-700"
+                    >
+                      <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit
+                    </Link>
+                  )}
                   <KudosButton
                     activityKey={item.key}
                     initialCount={kudosCountByKey[item.key] ?? 0}

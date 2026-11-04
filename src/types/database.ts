@@ -69,6 +69,7 @@ export type LoggedActivity = {
   hours: number;
   note: string | null;
   photo_url: string | null;
+  location: string | null;
   created_at: string;
 };
 

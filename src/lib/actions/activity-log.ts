@@ -21,6 +21,7 @@ export async function logActivity(formData: FormData): Promise<{ error: string |
     return { error: "Only volunteer accounts can log activities." };
   }
 
+  const activityId = String(formData.get("activity_id") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "") as OpportunityCategory;
   const orgName = String(formData.get("org_name") ?? "").trim() || null;
@@ -28,6 +29,7 @@ export async function logActivity(formData: FormData): Promise<{ error: string |
   const hours = Number(formData.get("hours"));
   const note = String(formData.get("note") ?? "").trim() || null;
   const photoUrl = String(formData.get("photo_url") ?? "").trim() || null;
+  const location = String(formData.get("location") ?? "").trim() || null;
 
   if (!title) return { error: "Add a title for what you did." };
   if (!CATEGORIES.includes(category)) return { error: "Choose a category." };
@@ -44,8 +46,7 @@ export async function logActivity(formData: FormData): Promise<{ error: string |
   if (diffDays < 0) return { error: "That date is in the future." };
   if (diffDays > 31) return { error: "You can only log activities from the past month." };
 
-  const { error } = await supabase.from("logged_activities").insert({
-    volunteer_id: user.id,
+  const row = {
     category,
     title,
     org_name: orgName,
@@ -53,7 +54,16 @@ export async function logActivity(formData: FormData): Promise<{ error: string |
     hours,
     note,
     photo_url: photoUrl,
-  });
+    location,
+  };
+
+  const { error } = activityId
+    ? await supabase
+        .from("logged_activities")
+        .update(row)
+        .eq("id", activityId)
+        .eq("volunteer_id", user.id)
+    : await supabase.from("logged_activities").insert({ ...row, volunteer_id: user.id });
 
   if (error) return { error: error.message };
 

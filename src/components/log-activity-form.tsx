@@ -18,18 +18,37 @@ function daysAgoLocal(days: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export function LogActivityForm({ userId }: { userId: string }) {
+export interface ExistingLoggedActivity {
+  id: string;
+  title: string;
+  category: string;
+  org_name: string | null;
+  occurred_at: string;
+  hours: number;
+  note: string | null;
+  photo_url: string | null;
+  location: string | null;
+}
+
+export function LogActivityForm({
+  userId,
+  existingActivity,
+}: {
+  userId: string;
+  existingActivity?: ExistingLoggedActivity;
+}) {
   const router = useRouter();
   const supabase = createClient();
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [category, setCategory] = useState("health");
-  const [title, setTitle] = useState("");
-  const [hours, setHours] = useState("1");
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [category, setCategory] = useState(existingActivity?.category ?? "health");
+  const [title, setTitle] = useState(existingActivity?.title ?? "");
+  const [hours, setHours] = useState(String(existingActivity?.hours ?? 1));
+  const [photoUrl, setPhotoUrl] = useState(existingActivity?.photo_url ?? "");
   const [uploading, setUploading] = useState(false);
+  const isEditing = !!existingActivity;
 
   const today = todayLocal();
   const earliest = daysAgoLocal(31);
@@ -92,14 +111,18 @@ export function LogActivityForm({ userId }: { userId: string }) {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <button
-        type="button"
-        onClick={applyBloodDonationPreset}
-        className="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-sm font-medium text-red-700 transition hover:bg-red-100"
-      >
-        <Droplet className="h-5 w-5 shrink-0" aria-hidden="true" />
-        Donated blood or platelets recently? Tap to fill this in.
-      </button>
+      <input type="hidden" name="activity_id" value={existingActivity?.id ?? ""} />
+
+      {!isEditing && (
+        <button
+          type="button"
+          onClick={applyBloodDonationPreset}
+          className="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-sm font-medium text-red-700 transition hover:bg-red-100"
+        >
+          <Droplet className="h-5 w-5 shrink-0" aria-hidden="true" />
+          Donated blood or platelets recently? Tap to fill this in.
+        </button>
+      )}
 
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-stone-700">
@@ -145,10 +168,25 @@ export function LogActivityForm({ userId }: { userId: string }) {
             id="org_name"
             name="org_name"
             type="text"
+            defaultValue={existingActivity?.org_name ?? ""}
             placeholder="e.g. American Red Cross"
             className="input mt-1"
           />
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="location" className="block text-sm font-medium text-stone-700">
+          Location (optional)
+        </label>
+        <input
+          id="location"
+          name="location"
+          type="text"
+          defaultValue={existingActivity?.location ?? ""}
+          placeholder="e.g. Santa Monica, or a street address"
+          className="input mt-1"
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -161,7 +199,7 @@ export function LogActivityForm({ userId }: { userId: string }) {
             name="occurred_at"
             type="date"
             required
-            defaultValue={today}
+            defaultValue={existingActivity?.occurred_at ?? today}
             min={earliest}
             max={today}
             className="input mt-1"
@@ -191,7 +229,13 @@ export function LogActivityForm({ userId }: { userId: string }) {
         <label htmlFor="note" className="block text-sm font-medium text-stone-700">
           Note (optional)
         </label>
-        <textarea id="note" name="note" rows={3} className="input mt-1" />
+        <textarea
+          id="note"
+          name="note"
+          rows={3}
+          defaultValue={existingActivity?.note ?? ""}
+          className="input mt-1"
+        />
       </div>
 
       <div>
@@ -233,7 +277,7 @@ export function LogActivityForm({ userId }: { userId: string }) {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <button type="submit" disabled={isPending} className="btn-primary w-full">
-        {isPending ? "Logging..." : "Log activity"}
+        {isPending ? "Saving..." : isEditing ? "Save changes" : "Log activity"}
       </button>
     </form>
   );
