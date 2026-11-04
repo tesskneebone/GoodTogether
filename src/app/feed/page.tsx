@@ -110,6 +110,18 @@ export default async function FeedPage({
     combined = combined.filter((i) => followingIds.has(i.volunteerId));
   }
 
+  // Private accounts' activity is only visible to themselves -- hidden
+  // from the feed for everyone else, regardless of follow status.
+  const candidateVolunteerIds = Array.from(new Set(combined.map((i) => i.volunteerId)));
+  if (candidateVolunteerIds.length > 0) {
+    const { data: privacyRows } = await supabase
+      .from("profiles")
+      .select("id, is_private")
+      .in("id", candidateVolunteerIds);
+    const privateIds = new Set((privacyRows ?? []).filter((p) => p.is_private).map((p) => p.id));
+    combined = combined.filter((i) => !privateIds.has(i.volunteerId) || i.volunteerId === user?.id);
+  }
+
   combined = combined.slice(0, 50);
 
   // Resolve org names for signup-derived items (always native, so org_id

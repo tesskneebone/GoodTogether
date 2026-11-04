@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { BadgeGrid } from "@/components/badge-grid";
 import { FollowButton } from "@/components/follow-button";
@@ -25,6 +26,9 @@ export default async function PublicProfilePage({
     data: { user },
   } = await supabase.auth.getUser();
 
+  const isOwnProfile = user?.id === profile.id;
+  const isPrivateView = profile.is_private && !isOwnProfile;
+
   const [{ count: followerCount }, { count: followingCount }, isFollowingRow] = await Promise.all([
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", profile.id),
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", profile.id),
@@ -39,14 +43,12 @@ export default async function PublicProfilePage({
   ]);
 
   const isVolunteer = profile.role === "volunteer";
-  const stats = isVolunteer ? await getVolunteerStats(supabase, profile.id) : null;
+  const stats = isVolunteer && !isPrivateView ? await getVolunteerStats(supabase, profile.id) : null;
   const earnedBadges = stats
     ? [...getMilestoneBadges(stats), getWeeklyBadge(stats), ...getCategoryBadges(stats)].filter(
         (b) => b.earned
       )
     : [];
-
-  const isOwnProfile = user?.id === profile.id;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
@@ -82,25 +84,36 @@ export default async function PublicProfilePage({
             )}
           </div>
 
-          {profile.bio && <p className="mt-3 text-sm text-stone-700">{profile.bio}</p>}
-          {profile.neighborhood && (
-            <p className="mt-1 text-sm text-stone-500">{profile.neighborhood}</p>
-          )}
+          {!isPrivateView && (
+            <>
+              {profile.bio && <p className="mt-3 text-sm text-stone-700">{profile.bio}</p>}
+              {profile.neighborhood && (
+                <p className="mt-1 text-sm text-stone-500">{profile.neighborhood}</p>
+              )}
 
-          <div className="mt-4 flex gap-6 text-sm">
-            <span>
-              <span className="font-semibold text-stone-900">{followerCount ?? 0}</span>{" "}
-              <span className="text-stone-500">followers</span>
-            </span>
-            <span>
-              <span className="font-semibold text-stone-900">{followingCount ?? 0}</span>{" "}
-              <span className="text-stone-500">following</span>
-            </span>
-          </div>
+              <div className="mt-4 flex gap-6 text-sm">
+                <span>
+                  <span className="font-semibold text-stone-900">{followerCount ?? 0}</span>{" "}
+                  <span className="text-stone-500">followers</span>
+                </span>
+                <span>
+                  <span className="font-semibold text-stone-900">{followingCount ?? 0}</span>{" "}
+                  <span className="text-stone-500">following</span>
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {isVolunteer && stats && (
+      {isPrivateView && (
+        <div className="card mt-6 flex items-center gap-3 p-6 text-stone-500">
+          <Lock className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <p className="text-sm">This account is private.</p>
+        </div>
+      )}
+
+      {!isPrivateView && isVolunteer && stats && (
         <div className="card mt-6 p-6">
           <h2 className="text-lg font-semibold text-stone-900">Impact</h2>
           <p className="mt-1 text-xs text-stone-400">

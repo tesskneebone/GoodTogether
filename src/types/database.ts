@@ -25,6 +25,7 @@ export type Profile = {
   age: number | null;
   neighborhood: string | null;
   avatar_url: string | null;
+  is_private: boolean;
   created_at: string;
 };
 

@@ -67,7 +67,8 @@ export default async function LeaderboardPage({
         Top volunteers by hours contributed across LA.
       </p>
       <p className="mt-1 text-xs text-stone-400">
-        Hours are self-reported, not independently verified. Prefer a feed over a ranking?{" "}
+        Hours are self-reported, not independently verified, and private accounts aren&apos;t
+        shown here. Prefer a feed over a ranking?{" "}
         <Link href="/feed" className="text-brand-700 hover:underline">
           See the activity feed
         </Link>

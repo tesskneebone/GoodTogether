@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { FollowButton } from "@/components/follow-button";
 
@@ -9,6 +10,7 @@ interface PersonResult {
   avatar_url: string | null;
   role: string;
   org_name: string | null;
+  is_private: boolean;
 }
 
 export default async function PeoplePage({
@@ -32,7 +34,7 @@ export default async function PeoplePage({
     // interpolating a search box's free text into it directly would let
     // that text restructure the filter instead of just being the value.
     const pattern = `%${query}%`;
-    const select = "id, full_name, username, avatar_url, role, org_name";
+    const select = "id, full_name, username, avatar_url, role, org_name, is_private";
     const [{ data: byName }, { data: byUsername }, { data: byOrgName }] = await Promise.all([
       supabase.from("profiles").select(select).ilike("full_name", pattern).limit(20),
       supabase.from("profiles").select(select).ilike("username", pattern).limit(20),
@@ -99,8 +101,11 @@ export default async function PeoplePage({
                   </span>
                 )}
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-stone-900">
+                  <p className="flex items-center gap-1.5 truncate font-medium text-stone-900">
                     {person.org_name ?? person.full_name}
+                    {person.is_private && (
+                      <Lock className="h-3.5 w-3.5 shrink-0 text-stone-400" aria-hidden="true" />
+                    )}
                   </p>
                   <p className="truncate text-sm text-stone-500">@{person.username}</p>
                 </div>

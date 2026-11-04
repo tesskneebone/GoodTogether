@@ -137,6 +137,24 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         />
       </div>
 
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-stone-200 p-4">
+        <input
+          type="checkbox"
+          name="is_private"
+          defaultChecked={profile.is_private}
+          className="mt-0.5 h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500"
+        />
+        <span>
+          <span className="block text-sm font-medium text-stone-700">Private account</span>
+          <span className="block text-sm text-stone-500">
+            When on, your public profile, activity, and badges are visible only to you
+            &mdash; hidden from the feed, the leaderboard, and your{" "}
+            {profile.username ? `/u/${profile.username}` : "public profile"} page for
+            everyone else.
+          </span>
+        </span>
+      </label>
+
       {error && <p className="text-sm text-red-600">{error}</p>}
       {success && <p className="text-sm text-brand-700">Profile updated.</p>}
 

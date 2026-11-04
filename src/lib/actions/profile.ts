@@ -26,6 +26,7 @@ export async function updateProfile(
   const avatarUrl = String(formData.get("avatar_url") ?? "").trim();
   const ageRaw = String(formData.get("age") ?? "").trim();
   const username = String(formData.get("username") ?? "").trim().toLowerCase();
+  const isPrivate = formData.get("is_private") === "on";
 
   if (!fullName) return { error: "Name is required." };
   if (!/^[a-z0-9_]{3,20}$/.test(username)) {
@@ -58,6 +59,7 @@ export async function updateProfile(
       neighborhood: neighborhood || null,
       avatar_url: avatarUrl || null,
       age,
+      is_private: isPrivate,
     })
     .eq("id", user.id);
 
@@ -68,5 +70,8 @@ export async function updateProfile(
 
   revalidatePath("/profile");
   revalidatePath("/dashboard");
+  revalidatePath("/feed");
+  revalidatePath("/leaderboard");
+  revalidatePath(`/u/${username}`);
   return { error: null, success: true };
 }
