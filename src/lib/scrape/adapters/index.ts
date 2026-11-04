@@ -12,6 +12,7 @@ import { createMidnightMissionAdapter } from "./midnight-mission";
 import { createUrmAdapter } from "./urm";
 import { createLaWorksAdapter } from "./la-works";
 import { createUclaBloodAdapter } from "./ucla-blood";
+import { createBigSundayAdapter } from "./big-sunday";
 import type { ScrapeAdapter } from "@/lib/scrape/types";
 
 /**
@@ -106,6 +107,7 @@ const realAdapters: ScrapeAdapter[] = [
   createUrmAdapter(),
   createLaWorksAdapter(),
   createUclaBloodAdapter(),
+  createBigSundayAdapter(),
 ];
 
 export const ADAPTERS: ScrapeAdapter[] = [
