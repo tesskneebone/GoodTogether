@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getCategoryPhoto } from "@/lib/unsplash";
 import type { OpportunityCategory } from "@/types/database";
 
 export interface OpportunityFormState {
@@ -58,9 +59,17 @@ export async function createOpportunity(
   const parsed = parseFormData(formData);
   if (parsed.error) return { error: parsed.error };
 
+  const photo = await getCategoryPhoto(parsed.values.category, parsed.values.title);
+
   const { data: opp, error } = await supabase
     .from("opportunities")
-    .insert({ ...parsed.values, org_id: user.id })
+    .insert({
+      ...parsed.values,
+      org_id: user.id,
+      image_url: photo?.url ?? null,
+      image_credit: photo?.credit ?? null,
+      image_credit_url: photo?.creditUrl ?? null,
+    })
     .select("id")
     .single();
 

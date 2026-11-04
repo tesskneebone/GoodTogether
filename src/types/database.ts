@@ -29,7 +29,7 @@ export type Profile = {
 
 export type Opportunity = {
   id: string;
-  org_id: string;
+  org_id: string | null;
   title: string;
   description: string;
   category: OpportunityCategory;
@@ -41,6 +41,12 @@ export type Opportunity = {
   spots_filled: number;
   image_url: string | null;
   created_at: string;
+  source: string | null;
+  source_name: string | null;
+  source_url: string | null;
+  external_id: string | null;
+  image_credit: string | null;
+  image_credit_url: string | null;
 };
 
 export type Signup = {
@@ -70,7 +76,6 @@ export type Database = {
       opportunities: {
         Row: Opportunity;
         Insert: Partial<Opportunity> & {
-          org_id: string;
           title: string;
           description: string;
           category: OpportunityCategory;

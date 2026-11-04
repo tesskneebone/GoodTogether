@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { DeleteOpportunityButton } from "@/components/delete-opportunity-button";
 import { BadgeGrid } from "@/components/badge-grid";
+import { OpportunityCard } from "@/components/opportunity-card";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
 import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
 import type { Opportunity } from "@/types/database";
@@ -169,26 +170,7 @@ export default async function DashboardPage() {
                 : signup.opportunities
             ) as Opportunity | null;
             if (!opp) return null;
-            return (
-              <Link
-                key={signup.id}
-                href={`/opportunities/${opp.id}`}
-                className="card block p-5 transition hover:border-brand-300 hover:shadow-md"
-              >
-                <span className="inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">
-                  {CATEGORY_LABELS[opp.category]}
-                </span>
-                <h3 className="mt-3 font-semibold text-stone-900">{opp.title}</h3>
-                <p className="mt-1 text-sm text-stone-500">{opp.neighborhood}</p>
-                <p className="mt-1 text-sm text-stone-500">
-                  {new Date(opp.starts_at).toLocaleDateString(undefined, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </p>
-              </Link>
-            );
+            return <OpportunityCard key={signup.id} opp={opp} />;
           })}
         </div>
       )}

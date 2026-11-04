@@ -20,11 +20,15 @@ export default async function OpportunityDetailPage({
 
   if (!opp) notFound();
 
-  const { data: org } = await supabase
-    .from("profiles")
-    .select("org_name, full_name")
-    .eq("id", opp.org_id)
-    .single();
+  const isImported = !!opp.source;
+
+  const { data: org } = opp.org_id
+    ? await supabase
+        .from("profiles")
+        .select("org_name, full_name")
+        .eq("id", opp.org_id)
+        .single()
+    : { data: null };
 
   const {
     data: { user },
@@ -33,7 +37,7 @@ export default async function OpportunityDetailPage({
   let isSignedUp = false;
   let canSignUp = false;
 
-  if (user) {
+  if (user && !isImported) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -63,15 +67,61 @@ export default async function OpportunityDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      <span className="inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">
-        {CATEGORY_LABELS[opp.category]}
-      </span>
+      {opp.image_url && (
+        <div className="mb-6 overflow-hidden rounded-xl">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={opp.image_url}
+            alt=""
+            className="h-64 w-full object-cover"
+          />
+          {opp.image_credit && (
+            <p className="mt-1 text-right text-xs text-stone-400">
+              Photo by{" "}
+              {opp.image_credit_url ? (
+                <a href={opp.image_credit_url} className="hover:underline">
+                  {opp.image_credit}
+                </a>
+              ) : (
+                opp.image_credit
+              )}{" "}
+              on Unsplash
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">
+          {CATEGORY_LABELS[opp.category]}
+        </span>
+        {isImported && (
+          <span className="inline-block rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-700">
+            Imported listing
+          </span>
+        )}
+      </div>
       <h1 className="mt-3 text-3xl font-bold text-stone-900">{opp.title}</h1>
       <p className="mt-1 text-stone-500">
-        Hosted by{" "}
-        <Link href={`/org/${opp.org_id}`} className="text-brand-700 hover:underline">
-          {org?.org_name ?? org?.full_name ?? "an organization"}
-        </Link>
+        {isImported ? (
+          opp.source_url ? (
+            <>
+              Posted via{" "}
+              <a href={opp.source_url} className="text-brand-700 hover:underline">
+                {opp.source_name ?? "an external source"}
+              </a>
+            </>
+          ) : (
+            `Posted via ${opp.source_name ?? "an external source"}`
+          )
+        ) : (
+          <>
+            Hosted by{" "}
+            <Link href={`/org/${opp.org_id}`} className="text-brand-700 hover:underline">
+              {org?.org_name ?? org?.full_name ?? "an organization"}
+            </Link>
+          </>
+        )}
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -95,23 +145,36 @@ export default async function OpportunityDetailPage({
         <p className="mt-2 whitespace-pre-wrap text-stone-700">{opp.description}</p>
       </div>
 
-      <div className="card mt-8 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-stone-600">
-          <span className="font-semibold text-stone-900">
-            {spotsLeft > 0 ? spotsLeft : 0}
-          </span>{" "}
-          of {opp.spots_total} spots left
-        </p>
-        <div className="sm:w-64">
-          <SignupButton
-            opportunityId={opp.id}
-            isSignedUp={isSignedUp}
-            isFull={spotsLeft <= 0}
-            canSignUp={canSignUp}
-            isLoggedIn={!!user}
-          />
+      {isImported ? (
+        <div className="card mt-8 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-stone-600">
+            Signups for this opportunity happen on {opp.source_name ?? "the original site"}.
+          </p>
+          {opp.source_url && (
+            <a href={opp.source_url} target="_blank" rel="noopener noreferrer" className="btn-primary sm:w-64 text-center">
+              View &amp; sign up on {opp.source_name ?? "source site"}
+            </a>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className="card mt-8 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-stone-600">
+            <span className="font-semibold text-stone-900">
+              {spotsLeft > 0 ? spotsLeft : 0}
+            </span>{" "}
+            of {opp.spots_total} spots left
+          </p>
+          <div className="sm:w-64">
+            <SignupButton
+              opportunityId={opp.id}
+              isSignedUp={isSignedUp}
+              isFull={spotsLeft <= 0}
+              canSignUp={canSignUp}
+              isLoggedIn={!!user}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

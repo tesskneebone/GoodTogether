@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORY_LABELS } from "@/lib/constants";
 import { Logo } from "@/components/logo";
+import { OpportunityCard } from "@/components/opportunity-card";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -38,6 +38,72 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="card p-8">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-xl">
+              🔍
+            </span>
+            <h2 className="mt-4 text-xl font-semibold text-stone-900">For volunteers</h2>
+            <p className="mt-1 text-sm text-stone-500">
+              Find a cause that fits your schedule and your neighborhood.
+            </p>
+            <ul className="mt-4 space-y-2 text-sm text-stone-700">
+              <li className="flex gap-2">
+                <span className="text-brand-600">&#10003;</span>
+                Search and filter by cause, date, and LA neighborhood
+              </li>
+              <li className="flex gap-2">
+                <span className="text-brand-600">&#10003;</span>
+                Browse opportunities on an interactive map
+              </li>
+              <li className="flex gap-2">
+                <span className="text-brand-600">&#10003;</span>
+                Track your volunteer hours automatically
+              </li>
+              <li className="flex gap-2">
+                <span className="text-brand-600">&#10003;</span>
+                Earn badges and climb the leaderboard
+              </li>
+            </ul>
+            <Link href="/opportunities" className="btn-primary mt-6 inline-flex">
+              Browse Opportunities
+            </Link>
+          </div>
+
+          <div className="card p-8">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sunset-100 text-xl">
+              📋
+            </span>
+            <h2 className="mt-4 text-xl font-semibold text-stone-900">For organizations</h2>
+            <p className="mt-1 text-sm text-stone-500">
+              Post an opportunity and reach volunteers actively looking in LA.
+            </p>
+            <ul className="mt-4 space-y-2 text-sm text-stone-700">
+              <li className="flex gap-2">
+                <span className="text-sunset-600">&#10003;</span>
+                Post an opportunity in under two minutes
+              </li>
+              <li className="flex gap-2">
+                <span className="text-sunset-600">&#10003;</span>
+                Get a public page listing everything you&apos;ve posted
+              </li>
+              <li className="flex gap-2">
+                <span className="text-sunset-600">&#10003;</span>
+                Manage signups and capacity from one dashboard
+              </li>
+              <li className="flex gap-2">
+                <span className="text-sunset-600">&#10003;</span>
+                No cost to post, ever
+              </li>
+            </ul>
+            <Link href="/signup" className="btn-secondary mt-6 inline-flex">
+              Post an Opportunity
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-stone-900">
             Coming up soon
@@ -58,24 +124,7 @@ export default async function Home() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {opportunities.map((opp) => (
-              <Link
-                key={opp.id}
-                href={`/opportunities/${opp.id}`}
-                className="card block p-5 transition hover:border-brand-300 hover:shadow-md"
-              >
-                <span className="inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">
-                  {CATEGORY_LABELS[opp.category]}
-                </span>
-                <h3 className="mt-3 font-semibold text-stone-900">{opp.title}</h3>
-                <p className="mt-1 text-sm text-stone-500">{opp.neighborhood}</p>
-                <p className="mt-1 text-sm text-stone-500">
-                  {new Date(opp.starts_at).toLocaleDateString(undefined, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </p>
-              </Link>
+              <OpportunityCard key={opp.id} opp={opp} />
             ))}
           </div>
         )}
