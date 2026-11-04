@@ -15,7 +15,12 @@ export function BadgeGrid({ title, badges }: { title: string; badges: Badge[] })
               badge.earned ? "border-brand-300 bg-brand-50" : "opacity-50 grayscale"
             }`}
           >
-            <span className="text-3xl">{badge.emoji}</span>
+            {badge.icon ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={badge.icon} alt="" className="h-12 w-12 object-contain" />
+            ) : (
+              <span className="text-3xl">{badge.emoji}</span>
+            )}
             <span className="text-xs font-medium text-stone-800">{badge.label}</span>
             {!badge.earned && (
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
