@@ -32,16 +32,21 @@ export async function CommunityImpact() {
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      {stats.map(({ label, value, icon: Icon }) => (
-        <div key={label} className="card flex flex-col items-center gap-2 p-8 text-center">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-brand-700">
-            <Icon className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <p className="text-3xl font-bold text-stone-900">{value}</p>
-          <p className="text-sm text-stone-500">{label}</p>
-        </div>
-      ))}
+    <div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {stats.map(({ label, value, icon: Icon }) => (
+          <div key={label} className="card flex flex-col items-center gap-2 p-8 text-center">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-brand-700">
+              <Icon className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <p className="text-3xl font-bold text-stone-900">{value}</p>
+            <p className="text-sm text-stone-500">{label}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-center text-xs text-stone-400">
+        Volunteer hours are self-reported based on opportunity sign-ups, not independently verified.
+      </p>
     </div>
   );
 }

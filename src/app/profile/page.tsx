@@ -53,6 +53,9 @@ export default async function ProfilePage() {
               See full progress &rarr;
             </Link>
           </div>
+          <p className="mt-1 text-xs text-stone-400">
+            Self-reported based on opportunity sign-ups, not independently verified.
+          </p>
           {earnedBadges.length === 0 ? (
             <p className="mt-3 text-sm text-stone-500">
               Sign up for an opportunity and log your first hours to start earning badges.

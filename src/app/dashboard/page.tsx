@@ -131,6 +131,9 @@ export default async function DashboardPage() {
             See leaderboard &rarr;
           </Link>
         </div>
+        <p className="mt-1 text-xs text-stone-400">
+          Hours and badges are self-reported based on your sign-ups, not independently verified.
+        </p>
         <div className="mt-3 flex flex-wrap gap-8">
           <div>
             <p className="text-3xl font-bold text-brand-700">{stats.totalHours}</p>

@@ -65,6 +65,9 @@ export default async function LeaderboardPage({
       <p className="mt-1 text-stone-500">
         Top volunteers by hours contributed across LA.
       </p>
+      <p className="mt-1 text-xs text-stone-400">
+        Hours are self-reported based on opportunity sign-ups, not independently verified.
+      </p>
 
       <div className="mt-6 inline-flex rounded-lg border border-stone-300 bg-white p-1 text-sm">
         <a
