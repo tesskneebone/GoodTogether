@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Search, ClipboardList } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Logo } from "@/components/logo";
 import { OpportunityCard } from "@/components/opportunity-card";
+import { CategoryGrid } from "@/components/category-grid";
+import { CommunityImpact } from "@/components/community-impact";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -12,36 +14,93 @@ export default async function Home() {
     .order("starts_at", { ascending: true })
     .limit(3);
 
+  const { data: heroPhotoRows } = await supabase
+    .from("opportunities")
+    .select("image_url, image_credit, image_credit_url")
+    .not("image_url", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const heroPhoto = heroPhotoRows?.[0];
+
+  const orgIds = Array.from(
+    new Set((opportunities ?? []).map((o) => o.org_id).filter((id): id is string => !!id))
+  );
+  const orgNamesById: Record<string, string> = {};
+  if (orgIds.length > 0) {
+    const { data: orgs } = await supabase
+      .from("profiles")
+      .select("id, org_name, full_name")
+      .in("id", orgIds);
+    for (const org of orgs ?? []) {
+      orgNamesById[org.id] = org.org_name ?? org.full_name;
+    }
+  }
+
   return (
     <div>
-      <section className="border-b border-stone-200 bg-gradient-to-b from-brand-50 to-stone-50">
-        <div className="mx-auto max-w-6xl px-4 py-20 text-center">
-          <Logo className="mx-auto h-16 w-16" />
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">
-            Volunteer across Los Angeles,
+      <section className="relative overflow-hidden">
+        {heroPhoto?.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={heroPhoto.image_url}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-100 to-brand-50" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-900/70 via-stone-900/55 to-stone-900/80" />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-24 text-center sm:py-32">
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            Find your people.
             <br />
-            <span className="text-brand-600">together.</span>
+            Make a difference.
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-stone-600">
-            Find local volunteer opportunities from LA nonprofits and community
-            groups, or post one for your organization.
+          <p className="mx-auto mt-4 max-w-xl text-lg text-white/90">
+            Discover meaningful ways to give back in Los Angeles.
           </p>
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href="/opportunities" className="btn-primary px-6 py-3 text-base">
-              Browse Opportunities
+              Explore Opportunities
             </Link>
-            <Link href="/signup" className="btn-secondary px-6 py-3 text-base">
+            <Link
+              href="/signup"
+              className="inline-flex items-center justify-center rounded-lg border border-white/70 bg-white/10 px-6 py-3 text-base font-medium text-white backdrop-blur transition hover:bg-white/20"
+            >
               Post an Opportunity
             </Link>
           </div>
+        </div>
+
+        {heroPhoto?.image_credit && (
+          <p className="absolute bottom-2 right-3 text-xs text-white/70">
+            Photo by{" "}
+            {heroPhoto.image_credit_url ? (
+              <a href={heroPhoto.image_credit_url} className="hover:underline">
+                {heroPhoto.image_credit}
+              </a>
+            ) : (
+              heroPhoto.image_credit
+            )}{" "}
+            on Unsplash
+          </p>
+        )}
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <h2 className="text-2xl font-semibold text-stone-900">Browse by cause</h2>
+        <p className="mt-1 text-stone-500">Find the kind of volunteering that fits you.</p>
+        <div className="mt-6">
+          <CategoryGrid />
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="card p-8">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-xl">
-              🔍
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-brand-700">
+              <Search className="h-5 w-5" aria-hidden="true" />
             </span>
             <h2 className="mt-4 text-xl font-semibold text-stone-900">For volunteers</h2>
             <p className="mt-1 text-sm text-stone-500">
@@ -71,8 +130,8 @@ export default async function Home() {
           </div>
 
           <div className="card p-8">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sunset-100 text-xl">
-              📋
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sunset-100 text-sunset-700">
+              <ClipboardList className="h-5 w-5" aria-hidden="true" />
             </span>
             <h2 className="mt-4 text-xl font-semibold text-stone-900">For organizations</h2>
             <p className="mt-1 text-sm text-stone-500">
@@ -105,9 +164,7 @@ export default async function Home() {
 
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-stone-900">
-            Coming up soon
-          </h2>
+          <h2 className="text-2xl font-semibold text-stone-900">Coming up soon</h2>
           <Link href="/opportunities" className="text-sm font-medium text-brand-700 hover:underline">
             View all &rarr;
           </Link>
@@ -124,10 +181,39 @@ export default async function Home() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {opportunities.map((opp) => (
-              <OpportunityCard key={opp.id} opp={opp} />
+              <OpportunityCard
+                key={opp.id}
+                opp={opp}
+                orgName={opp.org_id ? orgNamesById[opp.org_id] : undefined}
+              />
             ))}
           </div>
         )}
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <h2 className="text-center text-2xl font-semibold text-stone-900">Small actions. Big impact.</h2>
+        <div className="mt-6">
+          <CommunityImpact />
+        </div>
+      </section>
+
+      <section className="border-t border-stone-200 bg-brand-700">
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+          <h2 className="text-2xl font-semibold text-white sm:text-3xl">
+            Make a difference in your community.
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-brand-50">
+            Running a nonprofit or community group in LA? Post your volunteer opportunities
+            and reach people actively looking to help — free, always.
+          </p>
+          <Link
+            href="/signup"
+            className="mt-6 inline-flex items-center justify-center rounded-lg bg-white px-6 py-3 text-base font-medium text-brand-700 transition hover:bg-brand-50"
+          >
+            Post an Opportunity
+          </Link>
+        </div>
       </section>
     </div>
   );

@@ -10,7 +10,13 @@ const OpportunitiesMap = dynamic(
   { ssr: false, loading: () => <div className="h-[600px] animate-pulse rounded-xl bg-stone-100" /> }
 );
 
-export function OpportunitiesView({ opportunities }: { opportunities: Opportunity[] }) {
+export function OpportunitiesView({
+  opportunities,
+  orgNamesById = {},
+}: {
+  opportunities: Opportunity[];
+  orgNamesById?: Record<string, string>;
+}) {
   const [view, setView] = useState<"list" | "map">("list");
 
   return (
@@ -39,7 +45,11 @@ export function OpportunitiesView({ opportunities }: { opportunities: Opportunit
       {view === "list" ? (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {opportunities.map((opp) => (
-            <OpportunityCard key={opp.id} opp={opp} />
+            <OpportunityCard
+              key={opp.id}
+              opp={opp}
+              orgName={opp.org_id ? orgNamesById[opp.org_id] : undefined}
+            />
           ))}
         </div>
       ) : (

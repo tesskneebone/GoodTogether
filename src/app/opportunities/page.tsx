@@ -28,7 +28,10 @@ export default async function OpportunitiesPage({
     .gte("starts_at", from ? new Date(from).toISOString() : new Date().toISOString())
     .order("starts_at", { ascending: true });
 
-  if (category) query = query.eq("category", category as OpportunityCategory);
+  if (category) {
+    const categories = category.split(",") as OpportunityCategory[];
+    query = categories.length > 1 ? query.in("category", categories) : query.eq("category", categories[0]);
+  }
   if (neighborhood) query = query.eq("neighborhood", neighborhood);
   if (to) query = query.lte("starts_at", new Date(`${to}T23:59:59`).toISOString());
   if (q) query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
@@ -43,6 +46,20 @@ export default async function OpportunitiesPage({
   }
 
   const hasFilters = category || neighborhood || q || from || to || sort;
+
+  const orgIds = Array.from(
+    new Set(opportunities.map((o) => o.org_id).filter((id): id is string => !!id))
+  );
+  const orgNamesById: Record<string, string> = {};
+  if (orgIds.length > 0) {
+    const { data: orgs } = await supabase
+      .from("profiles")
+      .select("id, org_name, full_name")
+      .in("id", orgIds);
+    for (const org of orgs ?? []) {
+      orgNamesById[org.id] = org.org_name ?? org.full_name;
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -127,7 +144,9 @@ export default async function OpportunitiesPage({
         </div>
       )}
 
-      {opportunities.length > 0 && <OpportunitiesView opportunities={opportunities} />}
+      {opportunities.length > 0 && (
+        <OpportunitiesView opportunities={opportunities} orgNamesById={orgNamesById} />
+      )}
     </div>
   );
 }
