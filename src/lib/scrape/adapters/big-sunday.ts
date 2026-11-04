@@ -3,10 +3,11 @@ import { laTimeToUtc } from "@/lib/scrape/la-time";
 import type { ScrapeAdapter, ScrapedOpportunity } from "@/lib/scrape/types";
 
 // Big Sunday signs people up for Food Friday through an embedded Wufoo
-// form, not a page on bigsunday.org itself -- fetching bigsunday.org
-// directly wouldn't see the form's content (it's a separate iframed
-// document), so this reads the form page's own host instead.
-const FORM_URL = "https://bigsundayorg.wufoo.com/forms/za3mwkh1gu7ev6/";
+// form (bigsundayorg.wufoo.com), but Wufoo's own robots.txt disallows
+// crawling it entirely -- so this reads bigsunday.org's own page instead,
+// which is also the more useful link to hand volunteers anyway (they can
+// find the sign-up form from there).
+const PAGE_URL = "https://bigsunday.org/get-involved/foodpantry2026/";
 const USER_AGENT = `${BOT_USER_AGENT}/1.0 (+https://goodtogether.vercel.app)`;
 const ADDRESS = "1741 N. Cherokee Avenue, Los Angeles, CA 90028";
 const WEEKS_TO_GENERATE = 8;
@@ -66,9 +67,11 @@ function isLikelyClosed(year: number, month: number, day: number): boolean {
  * listing page to scrape, and the sign-up form's own list of dated
  * checkboxes only runs a few months out before it'd need Big Sunday to
  * republish it for the next stretch. Rather than parse that list (which
- * would go stale the moment it runs out), this confirms the "every
- * Friday ... 10am-11:30am" description is still on the page, then
- * generates the next several upcoming Fridays itself.
+ * would go stale the moment it runs out), this confirms the page is
+ * still up and still mentions "Friday" (a loose check -- the Wufoo
+ * form's own wording isn't necessarily duplicated on this page, and
+ * that form can't be fetched directly; see PAGE_URL comment above),
+ * then generates the next several upcoming Fridays itself.
  */
 export function createBigSundayAdapter(): ScrapeAdapter {
   return {
@@ -76,19 +79,18 @@ export function createBigSundayAdapter(): ScrapeAdapter {
     name: "Big Sunday",
     enabled: true,
     async fetch(): Promise<ScrapedOpportunity[]> {
-      const allowed = await isPathAllowed(FORM_URL);
+      const allowed = await isPathAllowed(PAGE_URL);
       if (!allowed) {
-        throw new Error(`robots.txt disallows ${FORM_URL} -- adapter left disabled`);
+        throw new Error(`robots.txt disallows ${PAGE_URL} -- adapter left disabled`);
       }
 
-      const res = await fetch(FORM_URL, { headers: { "User-Agent": USER_AGENT } });
-      if (!res.ok) throw new Error(`${FORM_URL} responded ${res.status}`);
+      const res = await fetch(PAGE_URL, { headers: { "User-Agent": USER_AGENT } });
+      if (!res.ok) throw new Error(`${PAGE_URL} responded ${res.status}`);
       const html = await res.text();
-      const normalized = html.replace(/&ndash;|&#8211;|–/g, "-").replace(/\s+/g, " ");
 
-      if (!/every friday/i.test(normalized) || !/10\s*:?\s*00\s*-\s*11\s*:?\s*30/i.test(normalized)) {
+      if (!/food\s*pantry/i.test(html) || !/friday/i.test(html)) {
         throw new Error(
-          "Big Sunday's \"every Friday 10am-11:30am\" schedule text wasn't found -- page may have changed; skipping import until the adapter is updated"
+          "Big Sunday's Food Pantry page no longer mentions \"Food Pantry\"/\"Friday\" -- page may have changed; skipping import until the adapter is updated"
         );
       }
 
@@ -119,7 +121,7 @@ export function createBigSundayAdapter(): ScrapeAdapter {
           address: ADDRESS,
           startsAt: startsAt.toISOString(),
           endsAt: endsAt.toISOString(),
-          sourceUrl: FORM_URL,
+          sourceUrl: PAGE_URL,
         });
       }
 
