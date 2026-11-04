@@ -1,6 +1,10 @@
 import { createRssAdapter } from "./rss";
 import { createHtmlAdapter } from "./html";
 import { createSeedAdapter } from "./seed";
+import { createHealTheBayAdapter } from "./heal-the-bay";
+import { createPvplcAdapter } from "./pvplc";
+import { createBallonaWetlandsAdapter } from "./ballona-wetlands";
+import { createFolarAdapter } from "./folar";
 import type { ScrapeAdapter } from "@/lib/scrape/types";
 
 /**
@@ -78,10 +82,26 @@ const exampleHtmlAdapter = createHtmlAdapter({
   enabled: false,
 });
 
+/**
+ * Real nonprofit sources, each confirmed (robots.txt + a per-event
+ * sign-up link) by researching the live site before being wired up --
+ * see the adapter files themselves for the per-source quirks.
+ */
+const realAdapters: ScrapeAdapter[] = [
+  createHealTheBayAdapter(),
+  createPvplcAdapter(),
+  createBallonaWetlandsAdapter(),
+  createFolarAdapter(),
+];
+
 export const ADAPTERS: ScrapeAdapter[] = [
   volunteerMatchStub,
   idealistStub,
   exampleRssAdapter,
   exampleHtmlAdapter,
-  createSeedAdapter(),
+  // Illustrative starter catalog -- off now that real sources are wired
+  // up above. Flip back on if you want guaranteed extra volume alongside
+  // the real listings.
+  { ...createSeedAdapter(), enabled: false },
+  ...realAdapters,
 ];

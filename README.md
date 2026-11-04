@@ -112,10 +112,27 @@ marketplaces whose inventory is their core product, and sites in that
 category near-universally prohibit scraping their search results. Pursue
 their official partner/API programs instead of scraping either one.
 
-To add a real source, edit `src/lib/scrape/adapters/index.ts` -- either call
-`createRssAdapter({...})` with a real feed URL, or `createHtmlAdapter({...})`
-with real CSS selectors for a site you've confirmed is okay to pull from,
-then add it to the exported `ADAPTERS` array with `enabled: true`.
+**Four real sources are wired up and enabled**, each researched and
+confirmed (robots.txt + a genuine per-event sign-up link) before being
+added: Heal the Bay (`adapters/heal-the-bay.ts`), PVPLC
+(`adapters/pvplc.ts`), Friends of Ballona Wetlands
+(`adapters/ballona-wetlands.ts`), and Friends of the LA River
+(`adapters/folar.ts`). Each has source-specific quirks (namespaced RSS
+fields, a second fetch per item for the real date, HTML-only scraping)
+documented in a comment at the top of its file. All of them build event
+times through `laTimeToUtc()` (`la-time.ts`) rather than `new Date(...)`,
+since the sources publish Pacific wall-clock times but imports run on a
+server in UTC. The illustrative starter catalog (`adapters/seed.ts`) is
+now disabled by default now that real sources exist; flip it back on in
+`adapters/index.ts` for guaranteed extra volume alongside them.
+
+To add another real source, edit `src/lib/scrape/adapters/index.ts` --
+either call `createRssAdapter({...})` with a real feed URL, or
+`createHtmlAdapter({...})` with real CSS selectors for a site you've
+confirmed is okay to pull from, then add it to the exported `ADAPTERS`
+array with `enabled: true`. For anything with per-source quirks like the
+four above, write a bespoke adapter file instead of forcing it through the
+generic factories.
 
 ### Running imports
 

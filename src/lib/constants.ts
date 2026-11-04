@@ -37,6 +37,8 @@ export const LA_NEIGHBORHOODS = [
   "East LA",
   "Inglewood",
   "West LA",
+  "Palos Verdes",
+  "Playa del Rey",
 ];
 
 // Approximate centroids for map markers. Neighborhood-level precision only —
@@ -60,6 +62,8 @@ export const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   "East LA": [34.0239, -118.1723],
   Inglewood: [33.9617, -118.3531],
   "West LA": [34.0469, -118.4487],
+  "Palos Verdes": [33.7845, -118.3908],
+  "Playa del Rey": [33.9617, -118.4473],
 };
 
 export const LA_MAP_CENTER: [number, number] = [34.0522, -118.2437];
