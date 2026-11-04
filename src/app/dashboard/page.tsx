@@ -43,10 +43,33 @@ export default async function DashboardPage() {
               Manage the volunteer opportunities you&apos;ve posted.
             </p>
           </div>
-          <Link href="/dashboard/new" className="btn-primary">
-            Post an opportunity
-          </Link>
+          {profile.org_status === "approved" && (
+            <Link href="/dashboard/new" className="btn-primary">
+              Post an opportunity
+            </Link>
+          )}
         </div>
+
+        {profile.org_status !== "approved" && (
+          <div className="card mt-6 p-4 text-sm">
+            {profile.org_status === "rejected" ? (
+              <p className="text-red-700">
+                Your organization wasn&apos;t approved to post opportunities. If you think this is
+                a mistake, reach out to us at{" "}
+                <a href="mailto:goodtogetherapp@gmail.com" className="underline">
+                  goodtogetherapp@gmail.com
+                </a>
+                .
+              </p>
+            ) : (
+              <p className="text-amber-700">
+                Your organization is pending approval. A GoodTogether admin verifies new
+                organizations before they can post opportunities &mdash; we&apos;ll let you know
+                once you&apos;re approved.
+              </p>
+            )}
+          </div>
+        )}
 
         {!opportunities || opportunities.length === 0 ? (
           <div className="card mt-8 p-8 text-center text-stone-500">

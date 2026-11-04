@@ -13,11 +13,12 @@ export default async function NewOpportunityPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, org_status")
     .eq("id", user.id)
     .single();
 
   if (profile?.role !== "org") redirect("/dashboard");
+  if (profile.org_status !== "approved") redirect("/dashboard");
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">

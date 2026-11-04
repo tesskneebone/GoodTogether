@@ -124,6 +124,10 @@ export default function SignupPage() {
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
             />
+            <p className="mt-2 text-xs text-stone-500">
+              A GoodTogether admin verifies new organizations before they can post opportunities.
+              We&apos;ll email you once you&apos;re approved.
+            </p>
           </div>
         )}
 

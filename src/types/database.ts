@@ -1,5 +1,7 @@
 export type UserRole = "volunteer" | "org";
 
+export type OrgStatus = "pending" | "approved" | "rejected";
+
 export type OpportunityCategory =
   | "environment"
   | "education"
@@ -26,6 +28,8 @@ export type Profile = {
   neighborhood: string | null;
   avatar_url: string | null;
   is_private: boolean;
+  org_status: OrgStatus | null;
+  is_admin: boolean;
   created_at: string;
 };
 
@@ -287,11 +291,17 @@ export type Database = {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      get_org_contact_email: {
+        Args: { target_id: string };
+        Returns: string | null;
+      };
+    };
     Enums: {
       user_role: UserRole;
       opportunity_category: OpportunityCategory;
       signup_status: SignupStatus;
+      org_status: OrgStatus;
     };
     CompositeTypes: Record<string, never>;
   };

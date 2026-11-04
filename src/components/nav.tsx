@@ -10,11 +10,16 @@ export async function Nav() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let profile: { role: string; full_name: string; avatar_url: string | null } | null = null;
+  let profile: {
+    role: string;
+    full_name: string;
+    avatar_url: string | null;
+    is_admin: boolean;
+  } | null = null;
   if (user) {
     const { data } = await supabase
       .from("profiles")
-      .select("role, full_name, avatar_url")
+      .select("role, full_name, avatar_url, is_admin")
       .eq("id", user.id)
       .single();
     profile = data;
@@ -25,6 +30,7 @@ export async function Nav() {
     ...(profile?.role === "org" ? [{ href: "/dashboard", label: "My Opportunities" }] : []),
     ...(profile?.role === "volunteer" ? [{ href: "/dashboard", label: "My Volunteering" }] : []),
     { href: "/feed", label: "Feed" },
+    ...(profile?.is_admin ? [{ href: "/admin/organizations", label: "Admin" }] : []),
   ];
 
   return (
