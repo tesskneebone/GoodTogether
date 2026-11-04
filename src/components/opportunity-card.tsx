@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, MapPin, Users } from "lucide-react";
 import { CATEGORY_LABELS } from "@/lib/constants";
+import { OpportunityImage } from "@/components/opportunity-image";
 import type { Opportunity } from "@/types/database";
 
 function formatDuration(startsAt: string, endsAt: string): string {
@@ -20,10 +21,7 @@ export function OpportunityCard({ opp, orgName }: { opp: Opportunity; orgName?: 
 
   return (
     <Link href={`/opportunities/${opp.id}`} className="card-interactive block overflow-hidden">
-      {opp.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={opp.image_url} alt={opp.title} className="h-36 w-full object-cover" />
-      )}
+      <OpportunityImage src={opp.image_url} alt={opp.title} className="h-36 w-full object-cover" />
       <div className="p-5">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">

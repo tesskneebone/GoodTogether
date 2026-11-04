@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { SignupButton } from "@/components/signup-button";
 import { SaveToCalendarButton } from "@/components/save-to-calendar-button";
+import { OpportunityImage } from "@/components/opportunity-image";
 
 export default async function OpportunityDetailPage({
   params,
@@ -81,12 +82,7 @@ export default async function OpportunityDetailPage({
     <div className="mx-auto max-w-3xl px-4 py-10">
       {opp.image_url && (
         <div className="mb-6 overflow-hidden rounded-xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={opp.image_url}
-            alt=""
-            className="h-64 w-full object-cover"
-          />
+          <OpportunityImage src={opp.image_url} alt="" className="h-64 w-full object-cover" />
           {opp.image_credit && (
             <p className="mt-1 text-right text-xs text-stone-400">
               Photo by{" "}
