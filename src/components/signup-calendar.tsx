@@ -10,6 +10,8 @@ export interface CalendarEvent {
   title: string;
   startsAt: string;
   category: OpportunityCategory;
+  /** Present for a signed-up opportunity (links to its page); absent for a logged activity. */
+  href?: string;
 }
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -94,16 +96,26 @@ export function SignupCalendar({ events }: { events: CalendarEvent[] }) {
                 {date.getDate()}
               </p>
               <div className="mt-1 space-y-0.5">
-                {dayEvents.slice(0, 2).map((event) => (
-                  <Link
-                    key={event.id}
-                    href={`/opportunities/${event.id}`}
-                    className="block truncate rounded bg-brand-100 px-1 py-0.5 text-[10px] font-medium text-brand-800 hover:bg-brand-200"
-                    title={`${event.title} · ${CATEGORY_LABELS[event.category]}`}
-                  >
-                    {event.title}
-                  </Link>
-                ))}
+                {dayEvents.slice(0, 2).map((event) =>
+                  event.href ? (
+                    <Link
+                      key={event.id}
+                      href={event.href}
+                      className="block truncate rounded bg-brand-100 px-1 py-0.5 text-[10px] font-medium text-brand-800 hover:bg-brand-200"
+                      title={`${event.title} · ${CATEGORY_LABELS[event.category]}`}
+                    >
+                      {event.title}
+                    </Link>
+                  ) : (
+                    <span
+                      key={event.id}
+                      className="block truncate rounded bg-sunset-100 px-1 py-0.5 text-[10px] font-medium text-sunset-800"
+                      title={`${event.title} · ${CATEGORY_LABELS[event.category]} (logged)`}
+                    >
+                      {event.title}
+                    </span>
+                  )
+                )}
                 {dayEvents.length > 2 && (
                   <p className="text-[10px] text-stone-500">+{dayEvents.length - 2} more</p>
                 )}
