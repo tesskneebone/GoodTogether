@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { CATEGORY_ICONS } from "@/lib/category-icons";
@@ -183,16 +183,28 @@ export default async function FeedPage({
             Real volunteering from across the GoodTogether community.
           </p>
         </div>
-        <Link href="/log" className="btn-primary hidden shrink-0 items-center gap-1.5 sm:inline-flex">
+        <div className="hidden shrink-0 items-center gap-2 sm:flex">
+          <Link href="/people" className="btn-secondary inline-flex items-center gap-1.5">
+            <Search className="h-4 w-4" aria-hidden="true" />
+            Find people
+          </Link>
+          <Link href="/log" className="btn-primary inline-flex items-center gap-1.5">
+            <PlusCircle className="h-4 w-4" aria-hidden="true" />
+            Log activity
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-4 flex gap-2 sm:hidden">
+        <Link href="/people" className="btn-secondary flex flex-1 items-center justify-center gap-1.5">
+          <Search className="h-4 w-4" aria-hidden="true" />
+          Find people
+        </Link>
+        <Link href="/log" className="btn-primary flex flex-1 items-center justify-center gap-1.5">
           <PlusCircle className="h-4 w-4" aria-hidden="true" />
           Log activity
         </Link>
       </div>
-
-      <Link href="/log" className="btn-primary mt-4 flex items-center justify-center gap-1.5 sm:hidden">
-        <PlusCircle className="h-4 w-4" aria-hidden="true" />
-        Log activity
-      </Link>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
         {user ? (

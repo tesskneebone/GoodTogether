@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, LogOut, Menu, User as UserIcon, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, Search, User as UserIcon, X } from "lucide-react";
 
 interface NavLink {
   href: string;
@@ -93,6 +93,14 @@ export function NavLinks({
                 >
                   <UserIcon className="h-4 w-4" /> Profile
                 </Link>
+                <Link
+                  href="/people"
+                  role="menuitem"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                >
+                  <Search className="h-4 w-4" /> Find people
+                </Link>
                 <form action={signOutAction}>
                   <button
                     type="submit"
@@ -150,6 +158,13 @@ export function NavLinks({
                   className="flex items-center gap-2 rounded-md px-3 py-2.5 font-medium text-stone-700"
                 >
                   {avatar} Profile
+                </Link>
+                <Link
+                  href="/people"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 rounded-md px-3 py-2.5 font-medium text-stone-700"
+                >
+                  <Search className="h-4 w-4" /> Find people
                 </Link>
                 <form action={signOutAction}>
                   <button
