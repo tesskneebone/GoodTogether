@@ -56,7 +56,7 @@ function parseDurationHours(duration: string | undefined): number {
 // guesser.
 function inferCategory(title: string, org: string): OpportunityCategory {
   const text = `${title} ${org}`.toLowerCase();
-  if (/animal|dog|cat|paws|humane/.test(text)) return "animal_welfare";
+  if (/\banimal\b|\bdog\b|\bcat\b|\bpaws\b|\bhumane\b/.test(text)) return "animal_welfare";
   if (/senior|elder/.test(text)) return "seniors";
   if (/blood|health|clinic|wellness|hospital/.test(text)) return "health";
   if (/\bart\b|mural|museum|barnsdall|gallery/.test(text)) return "arts_culture";
