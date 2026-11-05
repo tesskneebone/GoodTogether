@@ -5,6 +5,7 @@ import { CATEGORY_LABELS } from "@/lib/constants";
 import { CATEGORY_ICONS } from "@/lib/category-icons";
 import { KudosButton } from "@/components/kudos-button";
 import { CommentSection, type CommentItem } from "@/components/comment-section";
+import { SceneryBackdrop } from "@/components/scenery-backdrop";
 import type { Opportunity, OpportunityCategory } from "@/types/database";
 
 interface FeedItem {
@@ -237,7 +238,9 @@ export default async function FeedPage({
   const currentUserName = user ? profilesById[user.id]?.full_name ?? null : null;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
+    <div className="relative">
+      <SceneryBackdrop variant="feed" />
+      <div className="relative z-10 mx-auto max-w-2xl px-4 py-10">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-stone-900">Activity feed</h1>
@@ -405,6 +408,7 @@ export default async function FeedPage({
           })}
         </ol>
       )}
+      </div>
     </div>
   );
 }

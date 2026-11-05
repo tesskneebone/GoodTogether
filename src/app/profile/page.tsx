@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/profile-form";
 import { BadgeGrid } from "@/components/badge-grid";
 import { ProfileBanner } from "@/components/profile-banner";
+import { SceneryBackdrop } from "@/components/scenery-backdrop";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
 import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
 
@@ -32,7 +33,9 @@ export default async function ProfilePage() {
     : [];
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
+    <div className="relative">
+      <SceneryBackdrop variant="profile" />
+      <div className="relative z-10 mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-2xl font-semibold text-stone-900">Your profile</h1>
       <div className="card mt-4 overflow-hidden">
         <ProfileBanner badges={earnedBadges} heightClass="h-28" />
@@ -73,6 +76,7 @@ export default async function ProfilePage() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { BadgeGrid } from "@/components/badge-grid";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
 import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
+import { SceneryBackdrop } from "@/components/scenery-backdrop";
 import type { Opportunity } from "@/types/database";
 
 export default async function DashboardPage() {
@@ -141,7 +142,9 @@ export default async function DashboardPage() {
     (weeklyBadge.earned ? 1 : 0);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="relative">
+      <SceneryBackdrop variant="dashboard" />
+      <div className="relative z-10 mx-auto max-w-5xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-stone-900">My signups</h1>
@@ -232,6 +235,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
