@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/profile-form";
 import { BadgeGrid } from "@/components/badge-grid";
+import { ProfileBanner } from "@/components/profile-banner";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
 import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
 
@@ -34,7 +35,7 @@ export default async function ProfilePage() {
     <div className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-2xl font-semibold text-stone-900">Your profile</h1>
       <div className="card mt-4 overflow-hidden">
-        <div className="h-28 bg-gradient-to-r from-brand-400 via-sunset-300 to-sky-300" />
+        <ProfileBanner badges={earnedBadges} heightClass="h-28" />
         <div className="-mt-12 px-6 pb-6">
           <ProfileForm profile={profile} />
         </div>

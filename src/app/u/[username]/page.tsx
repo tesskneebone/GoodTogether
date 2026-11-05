@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { BadgeGrid } from "@/components/badge-grid";
+import { ProfileBanner } from "@/components/profile-banner";
 import { FollowButton } from "@/components/follow-button";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
 import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
@@ -53,7 +54,7 @@ export default async function PublicProfilePage({
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
       <div className="card overflow-hidden">
-        <div className="h-24 bg-gradient-to-r from-brand-400 via-sunset-300 to-sky-300" />
+        <ProfileBanner badges={earnedBadges} />
         <div className="-mt-10 px-6 pb-6">
           {profile.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
