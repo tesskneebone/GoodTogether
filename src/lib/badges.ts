@@ -27,17 +27,17 @@ const CATEGORY_BADGES: Record<
   OpportunityCategory,
   { emoji: string; icon?: string; label: string; threshold: number }
 > = {
-  environment: { emoji: "\u{1F30A}", icon: "/badges/cause-environment.png", label: "Ocean Hero", threshold: 5 },
-  education: { emoji: "\u{1F9E0}", icon: "/badges/cause-education.png", label: "Brainiac Buddy", threshold: 5 },
-  food_security: { emoji: "\u{1F96B}", icon: "/badges/cause-food_security.png", label: "Snack Pack Hero", threshold: 5 },
-  homelessness: { emoji: "\u{1F3E0}", icon: "/badges/cause-homelessness.png", label: "Shelter Star", threshold: 5 },
-  animal_welfare: { emoji: "\u{1F43E}", icon: "/badges/cause-animal_welfare.png", label: "Furry Friend", threshold: 5 },
-  health: { emoji: "\u{1F9E1}", icon: "/badges/cause-health.png", label: "Wellness Warrior", threshold: 5 },
-  seniors: { emoji: "\u{1F3B7}", icon: "/badges/cause-seniors.png", label: "Golden Years Guru", threshold: 5 },
-  youth: { emoji: "\u{1F3AE}", icon: "/badges/cause-youth.png", label: "Youth Responder", threshold: 5 },
-  disaster_relief: { emoji: "\u{26A1}", icon: "/badges/cause-disaster_relief.png", label: "Rapid Responder", threshold: 5 },
-  arts_culture: { emoji: "\u{1F3A8}", icon: "/badges/cause-arts_culture.png", label: "Culture Vulture", threshold: 5 },
-  other: { emoji: "\u{2B50}", icon: "/badges/cause-other.png", label: "Jack of All Trades", threshold: 5 },
+  environment: { emoji: "\u{1F30A}", icon: "/badges/cause-environment.png", label: "Ocean Hero", threshold: 10 },
+  education: { emoji: "\u{1F9E0}", icon: "/badges/cause-education.png", label: "Brainiac Buddy", threshold: 10 },
+  food_security: { emoji: "\u{1F96B}", icon: "/badges/cause-food_security.png", label: "Snack Pack Hero", threshold: 10 },
+  homelessness: { emoji: "\u{1F3E0}", icon: "/badges/cause-homelessness.png", label: "Shelter Star", threshold: 10 },
+  animal_welfare: { emoji: "\u{1F43E}", icon: "/badges/cause-animal_welfare.png", label: "Furry Friend", threshold: 10 },
+  health: { emoji: "\u{1F9E1}", icon: "/badges/cause-health.png", label: "Wellness Warrior", threshold: 10 },
+  seniors: { emoji: "\u{1F3B7}", icon: "/badges/cause-seniors.png", label: "Golden Years Guru", threshold: 10 },
+  youth: { emoji: "\u{1F3AE}", icon: "/badges/cause-youth.png", label: "Youth Responder", threshold: 10 },
+  disaster_relief: { emoji: "\u{26A1}", icon: "/badges/cause-disaster_relief.png", label: "Rapid Responder", threshold: 10 },
+  arts_culture: { emoji: "\u{1F3A8}", icon: "/badges/cause-arts_culture.png", label: "Culture Vulture", threshold: 10 },
+  other: { emoji: "\u{2B50}", icon: "/badges/cause-other.png", label: "Jack of All Trades", threshold: 10 },
 };
 
 const WEEKLY_TARGET_HOURS = 5;
