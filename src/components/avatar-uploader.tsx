@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { AvatarCropModal } from "@/components/avatar-crop-modal";
 
 export function AvatarUploader({
   userId,
@@ -17,11 +18,13 @@ export function AvatarUploader({
   const supabase = createClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(initialUrl);
+  const [editingSrc, setEditingSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
     if (!file) return;
     setError(null);
 
@@ -34,13 +37,22 @@ export function AvatarUploader({
       return;
     }
 
-    setUploading(true);
-    const ext = file.name.split(".").pop() ?? "jpg";
-    const path = `${userId}/avatar.${ext}`;
+    setEditingSrc(URL.createObjectURL(file));
+  }
 
+  function closeEditor() {
+    if (editingSrc) URL.revokeObjectURL(editingSrc);
+    setEditingSrc(null);
+  }
+
+  async function handleCropSave(blob: Blob) {
+    closeEditor();
+    setUploading(true);
+
+    const path = `${userId}/avatar.jpg`;
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(path, file, { upsert: true, cacheControl: "3600" });
+      .upload(path, blob, { upsert: true, cacheControl: "3600", contentType: "image/jpeg" });
 
     setUploading(false);
 
@@ -85,6 +97,10 @@ export function AvatarUploader({
         />
         {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>
+
+      {editingSrc && (
+        <AvatarCropModal imageSrc={editingSrc} onCancel={closeEditor} onSave={handleCropSave} />
+      )}
     </div>
   );
 }
