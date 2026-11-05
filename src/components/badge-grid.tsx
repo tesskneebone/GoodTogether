@@ -6,20 +6,20 @@ export function BadgeGrid({ title, badges }: { title: string; badges: Badge[] })
       <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
         {title}
       </h3>
-      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {badges.map((badge) => (
           <div
             key={badge.id}
             title={badge.description}
-            className={`card flex flex-col items-center gap-1 p-3 text-center transition ${
+            className={`card flex flex-col items-center gap-1.5 p-4 text-center transition ${
               badge.earned ? "border-brand-300 bg-brand-50" : "opacity-50 grayscale"
             }`}
           >
             {badge.icon ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={badge.icon} alt="" className="h-12 w-12 object-contain" />
+              <img src={badge.icon} alt="" className="h-20 w-20 object-contain" />
             ) : (
-              <span className="text-3xl">{badge.emoji}</span>
+              <span className="text-5xl">{badge.emoji}</span>
             )}
             <span className="text-xs font-medium text-stone-800">{badge.label}</span>
             {!badge.earned && (
