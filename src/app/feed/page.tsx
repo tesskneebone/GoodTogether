@@ -4,6 +4,9 @@ import { CATEGORY_LABELS } from "@/lib/constants";
 import { CATEGORY_SYMBOLS } from "@/lib/category-symbols";
 import { KudosButton } from "@/components/kudos-button";
 import { CommentSection, type CommentItem } from "@/components/comment-section";
+import { FeedSidebarProfile } from "@/components/feed-sidebar-profile";
+import { FeedSidebarDiscover } from "@/components/feed-sidebar-discover";
+import { getVolunteerStats } from "@/lib/volunteer-stats";
 import type { Opportunity, OpportunityCategory } from "@/types/database";
 
 interface FeedItem {
@@ -235,8 +238,89 @@ export default async function FeedPage({
 
   const currentUserName = user ? profilesById[user.id]?.full_name ?? null : null;
 
+  // Desktop sidebar data -- own profile card (left) and a couple of real
+  // discovery widgets (right): this week's top volunteers, and a few
+  // people not already followed. None of it is fetched on mobile-width
+  // renders since the sidebars are hidden there, but Server Components
+  // can't branch on viewport, so it's always fetched; all of it is cheap.
+  let sidebarProfile: {
+    username: string;
+    fullName: string;
+    avatarUrl: string | null;
+    followerCount: number;
+    followingCount: number;
+    totalHours: number;
+    hoursThisWeek: number;
+    completedCount: number;
+  } | null = null;
+  let suggestedPeople: {
+    id: string;
+    username: string;
+    full_name: string;
+    avatar_url: string | null;
+    neighborhood: string | null;
+  }[] = [];
+
+  if (user) {
+    const [{ data: ownProfile }, { count: followerCount }, { count: followingCount }, { data: followingRowsForSuggestions }] =
+      await Promise.all([
+        supabase.from("profiles").select("username, full_name, avatar_url").eq("id", user.id).single(),
+        supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", user.id),
+        supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id),
+        supabase.from("follows").select("following_id").eq("follower_id", user.id),
+      ]);
+
+    if (ownProfile) {
+      const stats = await getVolunteerStats(supabase, user.id);
+      sidebarProfile = {
+        username: ownProfile.username,
+        fullName: ownProfile.full_name,
+        avatarUrl: ownProfile.avatar_url,
+        followerCount: followerCount ?? 0,
+        followingCount: followingCount ?? 0,
+        totalHours: stats.totalHours,
+        hoursThisWeek: stats.hoursThisWeek,
+        completedCount: stats.completedCount,
+      };
+    }
+
+    const excludeIds = [user.id, ...(followingRowsForSuggestions ?? []).map((f) => f.following_id)];
+    const { data: suggested } = await supabase
+      .from("profiles")
+      .select("id, username, full_name, avatar_url, neighborhood")
+      .eq("role", "volunteer")
+      .eq("is_private", false)
+      .not("id", "in", `(${excludeIds.join(",")})`)
+      .order("created_at", { ascending: false })
+      .limit(4);
+    suggestedPeople = suggested ?? [];
+  }
+
+  const { data: weeklyLeaderRows } = await supabase
+    .from("volunteer_hours_weekly")
+    .select("*")
+    .gt("total_hours", 0)
+    .order("total_hours", { ascending: false })
+    .limit(5);
+
   return (
-    <div className="flex flex-col w-full pb-8">
+    <div className="mx-auto w-full max-w-[1200px] lg:grid lg:grid-cols-[260px_minmax(0,640px)_260px] lg:justify-center lg:gap-6 lg:px-4 lg:py-6">
+      <aside className="hidden lg:sticky lg:top-20 lg:block lg:h-fit">
+        {sidebarProfile ? (
+          <FeedSidebarProfile {...sidebarProfile} />
+        ) : (
+          <div className="rounded-xl bg-surface-container-lowest p-space-md text-center shadow-sm">
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              Log in to track your own impact and see it here.
+            </p>
+            <Link href="/login" className="mt-3 inline-flex rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md font-semibold text-on-primary">
+              Log in
+            </Link>
+          </div>
+        )}
+      </aside>
+
+      <div className="flex flex-col w-full pb-8">
       {/* Segmented tabs + search/log actions */}
       <div className="px-margin pt-2 pb-2 bg-surface/90 backdrop-blur-md sticky top-16 z-30 flex items-center justify-between gap-2 border-b border-surface-container-high/60">
         {user ? (
@@ -315,7 +399,7 @@ export default async function FeedPage({
             return (
               <article
                 key={item.key}
-                className="bg-surface-container-lowest border-y border-surface-container-high/40 pb-3"
+                className="bg-surface-container-lowest border-y border-surface-container-high/40 pb-3 sm:rounded-xl sm:border sm:shadow-sm"
               >
                 <div className="p-space-md pb-2 flex items-start justify-between gap-space-sm">
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -426,6 +510,11 @@ export default async function FeedPage({
           })}
         </div>
       )}
+      </div>
+
+      <aside className="hidden lg:sticky lg:top-20 lg:block lg:h-fit">
+        <FeedSidebarDiscover weeklyLeaders={weeklyLeaderRows ?? []} suggestedPeople={suggestedPeople} />
+      </aside>
     </div>
   );
 }
