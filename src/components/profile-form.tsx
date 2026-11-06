@@ -7,6 +7,9 @@ import { AvatarUploader } from "@/components/avatar-uploader";
 import { LA_NEIGHBORHOODS } from "@/lib/constants";
 import type { Profile } from "@/types/database";
 
+const inputClass =
+  "block w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-sm text-on-surface shadow-sm focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
+
 export function ProfileForm({ profile }: { profile: Profile }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -41,21 +44,16 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       />
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-stone-700">
+        <label className="mb-1 block text-sm font-medium text-on-surface-variant">
           {profile.role === "org" ? "Your name" : "Full name"}
         </label>
-        <input
-          name="full_name"
-          required
-          className="input"
-          defaultValue={profile.full_name}
-        />
+        <input name="full_name" required className={inputClass} defaultValue={profile.full_name} />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-stone-700">Username</label>
+        <label className="mb-1 block text-sm font-medium text-on-surface-variant">Username</label>
         <div className="flex items-center">
-          <span className="rounded-l-lg border border-r-0 border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-400">
+          <span className="rounded-l-lg border border-r-0 border-outline-variant bg-surface-container-low px-3 py-2 text-sm text-outline">
             @
           </span>
           <input
@@ -63,52 +61,41 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             required
             pattern="[a-z0-9_]{3,20}"
             title="3-20 characters: lowercase letters, numbers, underscores"
-            className="input rounded-l-none"
+            className={`${inputClass} rounded-l-none`}
             defaultValue={profile.username}
             onChange={(e) => {
               e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
             }}
           />
         </div>
-        <p className="mt-1 text-xs text-stone-400">
-          Your public profile: /u/{profile.username}
-        </p>
+        <p className="mt-1 text-xs text-outline">Your public profile: /u/{profile.username}</p>
       </div>
 
       {profile.role === "org" ? (
         <div>
-          <label className="mb-1 block text-sm font-medium text-stone-700">
+          <label className="mb-1 block text-sm font-medium text-on-surface-variant">
             Organization name
           </label>
-          <input
-            name="org_name"
-            required
-            className="input"
-            defaultValue={profile.org_name ?? ""}
-          />
+          <input name="org_name" required className={inputClass} defaultValue={profile.org_name ?? ""} />
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-stone-700">Age</label>
+            <label className="mb-1 block text-sm font-medium text-on-surface-variant">Age</label>
             <input
               type="number"
               name="age"
               min={13}
               max={120}
-              className="input"
+              className={inputClass}
               defaultValue={profile.age ?? ""}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-stone-700">
+            <label className="mb-1 block text-sm font-medium text-on-surface-variant">
               Neighborhood
             </label>
-            <select
-              name="neighborhood"
-              className="input"
-              defaultValue={profile.neighborhood ?? ""}
-            >
+            <select name="neighborhood" className={inputClass} defaultValue={profile.neighborhood ?? ""}>
               <option value="">Not set</option>
               {LA_NEIGHBORHOODS.map((n) => (
                 <option key={n} value={n}>
@@ -121,13 +108,13 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       )}
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-stone-700">
+        <label className="mb-1 block text-sm font-medium text-on-surface-variant">
           {profile.role === "org" ? "About your organization" : "Bio"}
         </label>
         <textarea
           name="bio"
           rows={4}
-          className="input"
+          className={inputClass}
           placeholder={
             profile.role === "org"
               ? "Tell volunteers what your organization does..."
@@ -137,16 +124,16 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         />
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-stone-200 p-4">
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-outline-variant p-4">
         <input
           type="checkbox"
           name="is_private"
           defaultChecked={profile.is_private}
-          className="mt-0.5 h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500"
+          className="mt-0.5 h-4 w-4 rounded border-outline-variant text-secondary focus:ring-secondary"
         />
         <span>
-          <span className="block text-sm font-medium text-stone-700">Private account</span>
-          <span className="block text-sm text-stone-500">
+          <span className="block text-sm font-medium text-on-surface-variant">Private account</span>
+          <span className="block text-sm text-outline">
             When on, your public profile, activity, and badges are visible only to you
             &mdash; hidden from the feed, the leaderboard, and your{" "}
             {profile.username ? `/u/${profile.username}` : "public profile"} page for
@@ -155,10 +142,14 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         </span>
       </label>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {success && <p className="text-sm text-brand-700">Profile updated.</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
+      {success && <p className="text-sm text-secondary">Profile updated.</p>}
 
-      <button type="submit" disabled={isPending} className="btn-primary">
+      <button
+        type="submit"
+        disabled={isPending}
+        className="rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+      >
         {isPending ? "Saving..." : "Save changes"}
       </button>
     </form>

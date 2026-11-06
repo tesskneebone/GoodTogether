@@ -7,7 +7,7 @@ export function ProfileBanner({ badges, heightClass = "h-24" }: { badges: Badge[
   const extra = badges.length - shown.length;
 
   return (
-    <div className={`relative ${heightClass} bg-gradient-to-r from-brand-400 via-sunset-300 to-sky-300`}>
+    <div className={`relative ${heightClass} bg-gradient-to-r from-primary-container via-secondary-fixed to-tertiary-fixed`}>
       {shown.length > 0 && (
         <div className="absolute right-2 top-2 flex items-center gap-2">
           {shown.map((badge) => (
@@ -25,7 +25,7 @@ export function ProfileBanner({ badges, heightClass = "h-24" }: { badges: Badge[
             </div>
           ))}
           {extra > 0 && (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-white/80 bg-white/90 text-base font-semibold text-stone-600 shadow-md">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-white/80 bg-white/90 text-base font-semibold text-on-surface shadow-md">
               +{extra}
             </div>
           )}

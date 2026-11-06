@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/profile-form";
 import { BadgeGrid } from "@/components/badge-grid";
 import { ProfileBanner } from "@/components/profile-banner";
-import { SceneryBackdrop } from "@/components/scenery-backdrop";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
 import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
 
@@ -33,40 +32,40 @@ export default async function ProfilePage() {
     : [];
 
   return (
-    <div className="relative">
-      <SceneryBackdrop variant="profile" />
-      <div className="relative z-10 mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-semibold text-stone-900">Your profile</h1>
-      <div className="card mt-4 overflow-hidden">
+    <div className="mx-auto max-w-2xl px-margin py-space-lg">
+      <h1 className="font-headline-md text-headline-md text-on-background">Your profile</h1>
+
+      <div className="mt-4 overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
         <ProfileBanner badges={earnedBadges} heightClass="h-28" />
         <div className="-mt-12 px-6 pb-6">
           <ProfileForm profile={profile} />
         </div>
       </div>
-      <p className="mt-4 text-center text-sm text-stone-500">
+
+      <p className="mt-4 text-center font-body-sm text-body-sm text-on-surface-variant">
         {profile.role === "org"
           ? "This shows up on your public organization page \u{1F3E2}"
           : "Orgs can see your name and neighborhood when you sign up \u{1F44B}"}
       </p>
 
       {isVolunteer && (
-        <div className="card mt-6 p-6">
+        <div className="mt-6 rounded-xl bg-surface-container-lowest p-space-md shadow-sm">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-lg font-semibold text-stone-900">Your badges</h2>
-            <Link href="/dashboard" className="text-sm font-medium text-brand-700 hover:underline">
+            <h2 className="font-headline-sm text-headline-sm text-primary">Your badges</h2>
+            <Link href="/dashboard" className="font-label-md text-label-md font-semibold text-secondary hover:underline">
               See full progress &rarr;
             </Link>
           </div>
-          <p className="mt-1 text-xs text-stone-400">
+          <p className="mt-1 text-xs text-outline">
             Self-reported based on opportunity sign-ups, not independently verified.
           </p>
           {earnedBadges.length === 0 ? (
-            <p className="mt-3 text-sm text-stone-500">
+            <p className="mt-3 font-body-sm text-body-sm text-on-surface-variant">
               Sign up for an opportunity and log your first hours to start earning badges.
             </p>
           ) : (
             <>
-              <p className="mt-1 text-sm text-stone-500">
+              <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
                 {earnedBadges.length} badge{earnedBadges.length === 1 ? "" : "s"} earned
               </p>
               <div className="mt-4">
@@ -76,7 +75,6 @@ export default async function ProfilePage() {
           )}
         </div>
       )}
-      </div>
     </div>
   );
 }

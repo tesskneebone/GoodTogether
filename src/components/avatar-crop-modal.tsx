@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
-import { RotateCcw, RotateCw, X } from "lucide-react";
 import { getCroppedImageBlob } from "@/lib/crop-image";
 
 export function AvatarCropModal({
@@ -39,21 +38,21 @@ export function AvatarCropModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-inverse-surface/60 p-4">
+      <div className="w-full max-w-md rounded-xl bg-surface-container-lowest p-5 shadow-xl">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-stone-900">Edit photo</h2>
+          <h2 className="font-headline-sm text-headline-sm text-on-surface">Edit photo</h2>
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+            className="rounded-full p-1 text-outline hover:bg-surface-container-low hover:text-on-surface"
             aria-label="Cancel"
           >
-            <X className="h-5 w-5" />
+            <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        <div className="relative mt-4 h-72 w-full overflow-hidden rounded-lg bg-stone-100">
+        <div className="relative mt-4 h-72 w-full overflow-hidden rounded-lg bg-surface-container">
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -70,7 +69,7 @@ export function AvatarCropModal({
 
         <div className="mt-4 space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-stone-500">Zoom</label>
+            <label className="mb-1 block text-xs font-medium text-on-surface-variant">Zoom</label>
             <input
               type="range"
               min={1}
@@ -83,35 +82,45 @@ export function AvatarCropModal({
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-stone-500">Rotate</label>
+            <label className="text-xs font-medium text-on-surface-variant">Rotate</label>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setRotation((r) => (r - 90 + 360) % 360)}
-                className="rounded-md border border-stone-300 p-1.5 text-stone-600 hover:bg-stone-50"
+                className="rounded-full border border-outline-variant p-1.5 text-on-surface-variant hover:bg-surface-container-low"
                 aria-label="Rotate left"
               >
-                <RotateCcw className="h-4 w-4" />
+                <span className="material-symbols-outlined text-[16px]">rotate_left</span>
               </button>
               <button
                 type="button"
                 onClick={() => setRotation((r) => (r + 90) % 360)}
-                className="rounded-md border border-stone-300 p-1.5 text-stone-600 hover:bg-stone-50"
+                className="rounded-full border border-outline-variant p-1.5 text-on-surface-variant hover:bg-surface-container-low"
                 aria-label="Rotate right"
               >
-                <RotateCw className="h-4 w-4" />
+                <span className="material-symbols-outlined text-[16px]">rotate_right</span>
               </button>
             </div>
           </div>
         </div>
 
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 text-sm text-error">{error}</p>}
 
         <div className="mt-5 flex justify-end gap-2">
-          <button type="button" onClick={onCancel} className="btn-secondary" disabled={saving}>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={saving}
+            className="rounded-full border border-outline-variant px-4 py-2 font-label-md text-label-md font-semibold text-on-surface-variant disabled:opacity-50"
+          >
             Cancel
           </button>
-          <button type="button" onClick={handleSave} className="btn-primary" disabled={saving}>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md font-semibold text-on-primary disabled:opacity-50"
+          >
             {saving ? "Saving..." : "Save photo"}
           </button>
         </div>

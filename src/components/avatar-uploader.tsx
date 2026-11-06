@@ -69,12 +69,12 @@ export function AvatarUploader({
 
   return (
     <div className="flex items-center gap-4">
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white bg-gradient-to-br from-sunset-300 to-brand-400 shadow-md">
+      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-surface-container-lowest bg-gradient-to-br from-secondary-fixed to-tertiary-fixed shadow-md">
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="" className="h-full w-full object-cover" />
         ) : (
-          <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
+          <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-on-secondary-fixed-variant">
             {fullName?.[0]?.toUpperCase() ?? "?"}
           </span>
         )}
@@ -84,7 +84,7 @@ export function AvatarUploader({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="btn-secondary"
+          className="rounded-full bg-surface-container px-4 py-2 font-label-md text-label-md font-semibold text-on-surface transition hover:bg-surface-container-high disabled:opacity-50"
         >
           {uploading ? "Uploading..." : "Change photo"}
         </button>
@@ -95,7 +95,7 @@ export function AvatarUploader({
           className="hidden"
           onChange={handleFileChange}
         />
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-sm text-error">{error}</p>}
       </div>
 
       {editingSrc && (

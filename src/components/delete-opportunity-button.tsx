@@ -20,7 +20,7 @@ export function DeleteOpportunityButton({ opportunityId }: { opportunityId: stri
     <button
       onClick={handleClick}
       disabled={isPending}
-      className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+      className="font-label-md text-label-md font-semibold text-error hover:underline disabled:opacity-50"
     >
       {isPending ? "Deleting..." : "Delete"}
     </button>
