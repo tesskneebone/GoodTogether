@@ -22,7 +22,7 @@ export async function AppHeader() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe">
+    <header className="fixed inset-x-0 top-0 z-[1100] bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe">
       <div className="h-16 px-margin flex items-center justify-between gap-space-sm">
         <Link href="/" className="flex items-center gap-space-sm min-w-0">
           <Logo className="h-8 w-8 flex-shrink-0" />
