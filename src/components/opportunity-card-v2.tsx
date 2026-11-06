@@ -20,7 +20,6 @@ function hostName(opp: Opportunity, orgName?: string) {
 
 /** Horizontal-scroll "Coming Up Soon" carousel card. */
 export function OpportunityCardCarousel({ opp, orgName }: { opp: Opportunity; orgName?: string }) {
-  const spotsLeft = opp.spots_total - opp.spots_filled;
   return (
     <Link
       href={`/opportunities/${opp.id}`}
@@ -32,11 +31,6 @@ export function OpportunityCardCarousel({ opp, orgName }: { opp: Opportunity; or
           <span className="material-symbols-outlined text-[13px]">{CATEGORY_SYMBOLS[opp.category]}</span>
           {CATEGORY_LABELS[opp.category]}
         </div>
-        {spotsLeft > 0 && (
-          <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-lg bg-surface-container-lowest/90 backdrop-blur-md text-secondary font-label-sm text-label-sm font-bold shadow-sm">
-            {spotsLeft} spot{spotsLeft === 1 ? "" : "s"} open
-          </div>
-        )}
       </div>
       <div className="p-space-md flex flex-col gap-space-xs flex-1 justify-between">
         <div>
@@ -59,7 +53,6 @@ export function OpportunityCardCarousel({ opp, orgName }: { opp: Opportunity; or
 
 /** Stacked vertical list card for the main "Browse by cause" list. */
 export function OpportunityCardStack({ opp, orgName }: { opp: Opportunity; orgName?: string }) {
-  const spotsLeft = opp.spots_total - opp.spots_filled;
   const symbol = CATEGORY_SYMBOLS[opp.category];
   return (
     <Link
@@ -95,18 +88,9 @@ export function OpportunityCardStack({ opp, orgName }: { opp: Opportunity; orgNa
           {opp.address && <span> &middot; {opp.address}</span>}
         </div>
       </div>
-      <div className="flex items-center justify-between pt-1 mt-0.5">
-        <span className="font-label-md text-label-md font-bold text-on-surface">
-          {opp.spots_filled}/{opp.spots_total} signed up
-        </span>
-        <span
-          className={`px-3 py-1.5 rounded-xl font-label-md text-label-md font-semibold ${
-            spotsLeft > 0
-              ? "bg-primary-container text-on-primary"
-              : "bg-surface-container text-on-surface-variant"
-          }`}
-        >
-          {spotsLeft > 0 ? "View & sign up" : "Full"}
+      <div className="flex items-center justify-end pt-1 mt-0.5">
+        <span className="px-3 py-1.5 rounded-xl font-label-md text-label-md font-semibold bg-primary-container text-on-primary">
+          View details
         </span>
       </div>
     </Link>

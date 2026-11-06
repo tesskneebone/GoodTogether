@@ -6,7 +6,7 @@ import { OpportunitiesView } from "@/components/opportunities-view";
 import { OpportunityCardCarousel } from "@/components/opportunity-card-v2";
 import type { Opportunity, OpportunityCategory } from "@/types/database";
 
-type SortOption = "soonest" | "spots";
+type SortOption = "soonest";
 
 export default async function OpportunitiesPage({
   searchParams,
@@ -36,7 +36,7 @@ export default async function OpportunitiesPage({
     return qs ? `/opportunities?${qs}` : "/opportunities";
   }
   const supabase = await createClient();
-  const sortOption: SortOption = sort === "spots" ? "spots" : "soonest";
+  const sortOption: SortOption = "soonest";
   const trimmedQuery = q?.trim() ?? "";
 
   // Returns a fresh query with the non-text filters applied, so it can be
@@ -102,11 +102,6 @@ export default async function OpportunitiesPage({
   opportunities.sort(
     (a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
   );
-  if (sortOption === "spots") {
-    opportunities.sort(
-      (a, b) => b.spots_total - b.spots_filled - (a.spots_total - a.spots_filled)
-    );
-  }
 
   const hasFilters = category || neighborhood || q || from || to || sort;
   const comingUpSoon = [...opportunities]
@@ -224,7 +219,6 @@ export default async function OpportunitiesPage({
             className="h-9 rounded-full border border-outline-variant bg-surface-container-lowest px-3 font-body-sm text-body-sm text-on-surface"
           >
             <option value="soonest">Soonest first</option>
-            <option value="spots">Most spots left</option>
           </select>
           <button
             type="submit"
