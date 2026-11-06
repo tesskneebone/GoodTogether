@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Heart } from "lucide-react";
 import { addComment, deleteComment, toggleCommentLike } from "@/lib/actions/comments";
 
 export interface CommentItem {
@@ -50,10 +49,16 @@ function CommentLikeButton({
       type="button"
       onClick={handleClick}
       className={`ml-2 inline-flex items-center gap-0.5 text-xs transition ${
-        liked ? "text-sunset-600" : "text-stone-400 hover:text-sunset-500"
+        liked ? "text-secondary" : "text-outline hover:text-secondary"
       }`}
     >
-      <Heart className={`h-3 w-3 ${liked ? "fill-sunset-500 text-sunset-500" : ""}`} aria-hidden="true" />
+      <span
+        className="material-symbols-outlined text-[13px]"
+        style={liked ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        aria-hidden="true"
+      >
+        favorite
+      </span>
       {count > 0 && count}
     </button>
   );
@@ -112,15 +117,15 @@ export function CommentSection({
   }
 
   return (
-    <div className="mt-3 border-t border-stone-100 pt-3">
+    <div className="mt-3 border-t border-surface-container-high pt-3">
       {comments.length > 0 && (
         <ul className="space-y-1.5">
           {comments.map((c) => {
             const isTemp = c.id.startsWith("temp-");
             return (
               <li key={c.id} className="text-sm">
-                <span className="font-medium text-stone-900">{c.authorName}</span>{" "}
-                <span className="text-stone-600">{c.body}</span>
+                <span className="font-medium text-on-surface">{c.authorName}</span>{" "}
+                <span className="text-on-surface-variant">{c.body}</span>
                 {!isTemp && (
                   <CommentLikeButton
                     commentId={c.id}
@@ -132,7 +137,7 @@ export function CommentSection({
                   <button
                     type="button"
                     onClick={() => handleDelete(c.id)}
-                    className="ml-2 text-xs text-stone-400 hover:text-red-600"
+                    className="ml-2 text-xs text-outline hover:text-error"
                   >
                     Delete
                   </button>
@@ -162,8 +167,8 @@ export function CommentSection({
           </button>
         </form>
       ) : (
-        <p className="mt-2 text-xs text-stone-400">
-          <a href="/login" className="text-brand-700 hover:underline">
+        <p className="mt-2 text-xs text-outline">
+          <a href="/login" className="text-primary hover:underline">
             Log in
           </a>{" "}
           to comment.

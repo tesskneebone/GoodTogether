@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Heart } from "lucide-react";
 import { toggleKudos } from "@/lib/actions/kudos";
 
 export function KudosButton({
@@ -43,14 +42,20 @@ export function KudosButton({
       type="button"
       onClick={handleClick}
       disabled={!isLoggedIn || isPending}
-      className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
+      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-label-md text-label-md font-bold transition active:scale-95 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 ${
         given
-          ? "border-sunset-300 bg-sunset-50 text-sunset-700"
-          : "border-stone-200 text-stone-500 hover:border-sunset-200 hover:text-sunset-600"
+          ? "bg-secondary-container text-on-secondary-container"
+          : "bg-surface-container text-on-surface hover:bg-secondary-container/40"
       } ${!isLoggedIn ? "cursor-default opacity-60" : ""}`}
     >
-      <Heart className={`h-4 w-4 ${given ? "fill-sunset-500 text-sunset-500" : ""}`} aria-hidden="true" />
-      {count > 0 ? count : "Kudos"}
+      <span
+        className="material-symbols-outlined text-[18px] text-secondary"
+        style={given ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        aria-hidden="true"
+      >
+        thumb_up
+      </span>
+      {count > 0 ? `${count} Kudos` : "Kudos"}
     </button>
   );
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Nav } from "@/components/nav";
+import { Suspense } from "react";
+import { AppHeader } from "@/components/app-header";
+import { BottomNav } from "@/components/bottom-nav";
 import { Footer } from "@/components/footer";
 import "./globals.css";
 
@@ -15,10 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col antialiased">
-        <Nav />
-        <main className="flex-1">{children}</main>
+      <body className="flex min-h-screen flex-col bg-surface font-sans text-on-surface antialiased">
+        <AppHeader />
+        <main className="flex-1 pt-16 pb-24">{children}</main>
         <Footer />
+        <Suspense fallback={null}>
+          <BottomNav />
+        </Suspense>
       </body>
     </html>
   );

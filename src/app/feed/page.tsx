@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { PlusCircle, Search, MapPin, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/constants";
-import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { CATEGORY_SYMBOLS } from "@/lib/category-symbols";
 import { KudosButton } from "@/components/kudos-button";
 import { CommentSection, type CommentItem } from "@/components/comment-section";
-import { SceneryBackdrop } from "@/components/scenery-backdrop";
 import type { Opportunity, OpportunityCategory } from "@/types/database";
 
 interface FeedItem {
@@ -238,54 +236,27 @@ export default async function FeedPage({
   const currentUserName = user ? profilesById[user.id]?.full_name ?? null : null;
 
   return (
-    <div className="relative">
-      <SceneryBackdrop variant="feed" />
-      <div className="relative z-10 mx-auto max-w-2xl px-4 py-10">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-stone-900">Activity feed</h1>
-          <p className="mt-1 text-sm text-stone-500">
-            Real volunteering from across the GoodTogether community.
-          </p>
-        </div>
-        <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          <Link href="/people" className="btn-secondary inline-flex items-center gap-1.5">
-            <Search className="h-4 w-4" aria-hidden="true" />
-            Find people
-          </Link>
-          <Link href="/log" className="btn-primary inline-flex items-center gap-1.5">
-            <PlusCircle className="h-4 w-4" aria-hidden="true" />
-            Log activity
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-4 flex gap-2 sm:hidden">
-        <Link href="/people" className="btn-secondary flex flex-1 items-center justify-center gap-1.5">
-          <Search className="h-4 w-4" aria-hidden="true" />
-          Find people
-        </Link>
-        <Link href="/log" className="btn-primary flex flex-1 items-center justify-center gap-1.5">
-          <PlusCircle className="h-4 w-4" aria-hidden="true" />
-          Log activity
-        </Link>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+    <div className="flex flex-col w-full pb-8">
+      {/* Segmented tabs + search/log actions */}
+      <div className="px-margin pt-2 pb-2 bg-surface/90 backdrop-blur-md sticky top-16 z-30 flex items-center justify-between gap-2 border-b border-surface-container-high/60">
         {user ? (
-          <div className="inline-flex rounded-lg border border-stone-300 bg-white p-1 text-sm">
+          <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-full text-label-md font-label-md">
             <Link
               href="/feed"
-              className={`rounded-md px-3 py-1.5 font-medium transition ${
-                !showFollowingOnly ? "bg-brand-600 text-white" : "text-stone-600 hover:bg-stone-50"
+              className={`px-3.5 py-1.5 rounded-full font-bold transition-all duration-150 ${
+                !showFollowingOnly
+                  ? "text-on-primary bg-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
               Everyone
             </Link>
             <Link
               href="/feed?scope=following"
-              className={`rounded-md px-3 py-1.5 font-medium transition ${
-                showFollowingOnly ? "bg-brand-600 text-white" : "text-stone-600 hover:bg-stone-50"
+              className={`px-3.5 py-1.5 rounded-full font-semibold transition-all duration-150 ${
+                showFollowingOnly
+                  ? "text-on-primary bg-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
               Following
@@ -294,9 +265,30 @@ export default async function FeedPage({
         ) : (
           <span />
         )}
-        <p className="text-xs text-stone-400">
-          Self-reported, not independently verified.{" "}
-          <Link href="/leaderboard" className="text-brand-700 hover:underline">
+        <div className="flex items-center gap-1">
+          <Link
+            href="/people"
+            aria-label="Find people"
+            className="w-9 h-9 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors"
+          >
+            <span className="material-symbols-outlined text-[20px]">search</span>
+          </Link>
+          <Link
+            href="/log"
+            aria-label="Log activity"
+            className="w-9 h-9 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors"
+          >
+            <span className="material-symbols-outlined text-[20px]">add_circle</span>
+          </Link>
+        </div>
+      </div>
+
+      <div className="px-margin pt-3 pb-1">
+        <h1 className="font-headline-md text-headline-md text-on-background">Activity feed</h1>
+        <p className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">
+          Real volunteering from across the GoodTogether community &mdash; self-reported, not
+          independently verified.{" "}
+          <Link href="/leaderboard" className="text-secondary hover:underline">
             See the leaderboard
           </Link>
           .
@@ -304,92 +296,116 @@ export default async function FeedPage({
       </div>
 
       {combined.length === 0 ? (
-        <div className="card mt-8 p-8 text-center text-stone-500">
+        <div className="mx-margin mt-6 rounded-xl bg-surface-container-lowest p-8 text-center text-on-surface-variant shadow-[0_4px_20px_-2px_rgba(27,77,62,0.06)]">
           {showFollowingOnly
             ? "Nobody you follow has logged anything yet."
             : "No activity yet. Sign up for an opportunity or"}{" "}
           {!showFollowingOnly && (
-            <Link href="/log" className="text-brand-700 hover:underline">
+            <Link href="/log" className="text-secondary hover:underline">
               log one
             </Link>
           )}
           {!showFollowingOnly && " to get the feed started."}
         </div>
       ) : (
-        <ol className="mt-6 space-y-3">
+        <div className="flex flex-col gap-3 pt-3">
           {combined.map((item) => {
             const profile = profilesById[item.volunteerId];
-            const Icon = CATEGORY_ICONS[item.category];
+            const symbol = CATEGORY_SYMBOLS[item.category];
             return (
-              <li key={item.key} className="card p-5">
-                <div className="flex items-start gap-3">
-                  <Link href={profile ? `/u/${profile.username}` : "#"} className="shrink-0">
-                    {profile?.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={profile.avatar_url}
-                        alt=""
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sunset-100 text-sm font-semibold text-sunset-700">
-                        {profile?.full_name?.[0]?.toUpperCase() ?? "?"}
-                      </span>
-                    )}
-                  </Link>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-stone-700">
+              <article
+                key={item.key}
+                className="bg-surface-container-lowest border-y border-surface-container-high/40 pb-3"
+              >
+                <div className="p-space-md pb-2 flex items-start justify-between gap-space-sm">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Link href={profile ? `/u/${profile.username}` : "#"} className="flex-shrink-0">
+                      {profile?.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={profile.avatar_url}
+                          alt=""
+                          className="w-10 h-10 rounded-full object-cover border border-outline-variant"
+                        />
+                      ) : (
+                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary-fixed text-sm font-bold text-on-secondary-fixed-variant border border-outline-variant">
+                          {profile?.full_name?.[0]?.toUpperCase() ?? "?"}
+                        </span>
+                      )}
+                    </Link>
+                    <div className="flex flex-col min-w-0">
                       <Link
                         href={profile ? `/u/${profile.username}` : "#"}
-                        className="font-semibold text-stone-900 hover:underline"
+                        className="font-label-lg text-label-lg font-bold text-on-surface truncate hover:underline"
                       >
                         {profile?.full_name ?? "Someone"}
-                      </Link>{" "}
-                      logged{" "}
-                      <span className="font-medium">
-                        {item.hours} hr{item.hours === 1 ? "" : "s"}
-                      </span>{" "}
-                      of volunteering
-                    </p>
-                    <p className="mt-0.5 flex items-center gap-1.5 text-sm text-stone-500">
-                      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                      {item.title}
-                      {item.orgName && <span> &middot; {item.orgName}</span>}
-                    </p>
-                    {item.location && (
-                      <p className="mt-0.5 flex items-center gap-1.5 text-sm text-stone-500">
-                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        {item.location}
-                      </p>
-                    )}
-                    {item.note && (
-                      <p className="mt-1 text-sm italic text-stone-500">&ldquo;{item.note}&rdquo;</p>
-                    )}
-                    {item.photoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={item.photoUrl}
-                        alt=""
-                        className="mt-2 max-h-72 w-full rounded-lg object-cover"
-                      />
-                    )}
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">
-                        {CATEGORY_LABELS[item.category]}
-                      </span>
-                      <span className="text-xs text-stone-400">{formatRelativeTime(item.feedAt)}</span>
+                      </Link>
+                      <div className="flex items-center gap-1 text-[11px] text-outline truncate">
+                        <span>{formatRelativeTime(item.feedAt)}</span>
+                        {item.location && (
+                          <>
+                            <span>&bull;</span>
+                            <span className="text-on-surface-variant font-medium">{item.location}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="mt-3 flex items-center justify-end gap-2">
                   {item.editHref && (
                     <Link
                       href={item.editHref}
-                      className="flex items-center gap-1 rounded-full border border-stone-200 px-3 py-1 text-sm font-medium text-stone-500 transition hover:border-stone-300 hover:text-stone-700"
+                      aria-label="Edit"
+                      className="w-7 h-7 flex items-center justify-center rounded-full text-outline hover:bg-surface-container-low flex-shrink-0"
                     >
-                      <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
                     </Link>
                   )}
+                </div>
+
+                <div className="px-space-md pb-2">
+                  <h2 className="font-headline-sm text-body-lg font-bold text-on-surface tracking-tight leading-snug">
+                    {item.title}
+                  </h2>
+                  {item.orgName && (
+                    <p className="font-body-sm text-body-sm text-secondary font-semibold mt-0.5">
+                      {item.orgName}
+                    </p>
+                  )}
+                  {item.note && (
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed italic">
+                      &ldquo;{item.note}&rdquo;
+                    </p>
+                  )}
+                </div>
+
+                <div className="mx-space-md mb-3 py-2 px-3 bg-surface-container-low rounded-lg grid grid-cols-2 gap-1 border border-surface-container-high/40">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-label-sm uppercase tracking-wider text-outline">
+                      Hours
+                    </span>
+                    <span className="text-body-md font-bold text-on-surface leading-tight">
+                      {item.hours} hr{item.hours === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col border-l border-surface-container-high pl-2">
+                    <span className="text-[10px] font-label-sm uppercase tracking-wider text-outline">
+                      Cause
+                    </span>
+                    <span className="text-body-md font-bold text-secondary leading-tight flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px]">{symbol}</span>
+                      {CATEGORY_LABELS[item.category]}
+                    </span>
+                  </div>
+                </div>
+
+                {item.photoUrl && (
+                  <div className="relative w-full h-56 bg-surface-container overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={item.photoUrl} alt="" className="w-full h-full object-cover" />
+                  </div>
+                )}
+
+                <div className="px-space-md pt-2.5 flex items-center justify-between border-t border-surface-container-high/40 mt-2">
                   <KudosButton
                     activityKey={item.key}
                     initialCount={kudosCountByKey[item.key] ?? 0}
@@ -397,18 +413,19 @@ export default async function FeedPage({
                     isLoggedIn={!!user}
                   />
                 </div>
-                <CommentSection
-                  activityKey={item.key}
-                  initialComments={commentsByKey[item.key] ?? []}
-                  currentUserId={user?.id ?? null}
-                  currentUserName={currentUserName}
-                />
-              </li>
+                <div className="px-space-md">
+                  <CommentSection
+                    activityKey={item.key}
+                    initialComments={commentsByKey[item.key] ?? []}
+                    currentUserId={user?.id ?? null}
+                    currentUserName={currentUserName}
+                  />
+                </div>
+              </article>
             );
           })}
-        </ol>
+        </div>
       )}
-      </div>
     </div>
   );
 }
