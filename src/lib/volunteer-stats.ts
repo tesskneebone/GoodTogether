@@ -28,7 +28,7 @@ export async function getVolunteerStats(
   const [{ data: signupRows }, { data: loggedRows }, { data: savedRows }] = await Promise.all([
     supabase
       .from("signups")
-      .select("opportunities(category, starts_at, ends_at)")
+      .select("hours_override, opportunities(category, starts_at, ends_at)")
       .eq("volunteer_id", volunteerId)
       .eq("status", "confirmed"),
     supabase
@@ -40,7 +40,7 @@ export async function getVolunteerStats(
     // native signup.
     supabase
       .from("saved_opportunities")
-      .select("opportunities(category, starts_at, ends_at)")
+      .select("hours_override, opportunities(category, starts_at, ends_at)")
       .eq("volunteer_id", volunteerId),
   ]);
 
@@ -53,11 +53,12 @@ export async function getVolunteerStats(
 
   type OppSlice = { category: OpportunityCategory; starts_at: string; ends_at: string };
 
-  function addCompletedOpportunity(opp: OppSlice | null) {
+  function addCompletedOpportunity(opp: OppSlice | null, hoursOverride?: number | null) {
     if (!opp || !opp.ends_at || !opp.starts_at) return;
     if (new Date(opp.ends_at) >= new Date()) return;
 
     const hours =
+      hoursOverride ??
       (new Date(opp.ends_at).getTime() - new Date(opp.starts_at).getTime()) / 3600000;
     if (hours <= 0) return;
 
@@ -74,14 +75,14 @@ export async function getVolunteerStats(
     const opp = (
       Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
     ) as OppSlice | null;
-    addCompletedOpportunity(opp);
+    addCompletedOpportunity(opp, row.hours_override);
   }
 
   for (const row of savedRows ?? []) {
     const opp = (
       Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
     ) as OppSlice | null;
-    addCompletedOpportunity(opp);
+    addCompletedOpportunity(opp, row.hours_override);
   }
 
   for (const row of loggedRows ?? []) {

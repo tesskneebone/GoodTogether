@@ -4,6 +4,7 @@ import { CATEGORY_LABELS } from "@/lib/constants";
 import { CATEGORY_SYMBOLS } from "@/lib/category-symbols";
 import { KudosButton } from "@/components/kudos-button";
 import { CommentSection, type CommentItem } from "@/components/comment-section";
+import { EditActivityButton } from "@/components/edit-activity-modal";
 import { FeedSidebarProfile } from "@/components/feed-sidebar-profile";
 import { FeedSidebarDiscover } from "@/components/feed-sidebar-discover";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
@@ -11,16 +12,25 @@ import type { Opportunity, OpportunityCategory } from "@/types/database";
 
 interface FeedItem {
   key: string;
+  kind: "signup" | "saved" | "manual";
+  rawId: string;
   volunteerId: string;
   category: OpportunityCategory;
   title: string;
   orgName: string | null;
   orgId: string | null;
   hours: number;
+  computedHours: number;
+  hoursOverride: number | null;
   happenedAt: string;
   feedAt: string;
   note?: string | null;
   photoUrl?: string | null;
+  /** The user's own uploaded photo, if any -- distinct from photoUrl,
+   *  which falls back to the opportunity's stock photo for signup/saved
+   *  items. Used to seed the edit modal so it doesn't treat that stock
+   *  photo as something the user chose. */
+  ownPhotoUrl?: string | null;
   location?: string | null;
   editHref?: string;
 }
@@ -53,7 +63,7 @@ export default async function FeedPage({
   const [{ data: signupRows }, { data: loggedRows }, { data: savedRows }] = await Promise.all([
     supabase
       .from("signups")
-      .select("id, volunteer_id, opportunities(*)")
+      .select("id, volunteer_id, note, photo_url, hours_override, opportunities(*)")
       .eq("status", "confirmed")
       .order("created_at", { ascending: false })
       .limit(100),
@@ -67,7 +77,7 @@ export default async function FeedPage({
     // other completed activity.
     supabase
       .from("saved_opportunities")
-      .select("volunteer_id, created_at, opportunities(*)")
+      .select("volunteer_id, created_at, note, photo_url, hours_override, opportunities(*)")
       .order("created_at", { ascending: false })
       .limit(60),
   ]);
@@ -78,18 +88,25 @@ export default async function FeedPage({
         Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
       ) as Opportunity | null;
       if (!opp || new Date(opp.ends_at) >= new Date()) return null;
-      const hours = (new Date(opp.ends_at).getTime() - new Date(opp.starts_at).getTime()) / 3600000;
+      const computedHours =
+        (new Date(opp.ends_at).getTime() - new Date(opp.starts_at).getTime()) / 3600000;
       return {
         key: `signup:${row.id}`,
+        kind: "signup",
+        rawId: row.id,
         volunteerId: row.volunteer_id,
         category: opp.category,
         title: opp.title,
         orgName: null,
         orgId: opp.org_id,
-        hours: Math.round(hours * 10) / 10,
+        hours: Math.round((row.hours_override ?? computedHours) * 10) / 10,
+        computedHours: Math.round(computedHours * 10) / 10,
+        hoursOverride: row.hours_override,
         happenedAt: opp.ends_at,
         feedAt: opp.ends_at,
-        photoUrl: opp.image_url,
+        note: row.note,
+        photoUrl: row.photo_url ?? opp.image_url,
+        ownPhotoUrl: row.photo_url,
       };
     })
     .filter((x): x is FeedItem => x !== null);
@@ -100,30 +117,41 @@ export default async function FeedPage({
         Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities
       ) as Opportunity | null;
       if (!opp || new Date(opp.ends_at) >= new Date()) return null;
-      const hours = (new Date(opp.ends_at).getTime() - new Date(opp.starts_at).getTime()) / 3600000;
+      const computedHours =
+        (new Date(opp.ends_at).getTime() - new Date(opp.starts_at).getTime()) / 3600000;
       return {
         key: `saved:${opp.id}`,
+        kind: "saved",
+        rawId: opp.id,
         volunteerId: row.volunteer_id,
         category: opp.category,
         title: opp.title,
         orgName: opp.source_name,
         orgId: null,
-        hours: Math.round(hours * 10) / 10,
+        hours: Math.round((row.hours_override ?? computedHours) * 10) / 10,
+        computedHours: Math.round(computedHours * 10) / 10,
+        hoursOverride: row.hours_override,
         happenedAt: opp.ends_at,
         feedAt: opp.ends_at,
-        photoUrl: opp.image_url,
+        note: row.note,
+        photoUrl: row.photo_url ?? opp.image_url,
+        ownPhotoUrl: row.photo_url,
       };
     })
     .filter((x): x is FeedItem => x !== null);
 
   const loggedItems: FeedItem[] = (loggedRows ?? []).map((row) => ({
     key: `manual:${row.id}`,
+    kind: "manual",
+    rawId: row.id,
     volunteerId: row.volunteer_id,
     category: row.category,
     title: row.title,
     orgName: row.org_name,
     orgId: null,
     hours: row.hours,
+    computedHours: row.hours,
+    hoursOverride: null,
     happenedAt: row.occurred_at,
     feedAt: row.created_at,
     note: row.note,
@@ -443,6 +471,18 @@ export default async function FeedPage({
                     >
                       <span className="material-symbols-outlined text-[18px]">edit</span>
                     </Link>
+                  )}
+                  {user && item.volunteerId === user.id && (item.kind === "signup" || item.kind === "saved") && (
+                    <EditActivityButton
+                      kind={item.kind}
+                      id={item.rawId}
+                      userId={user.id}
+                      computedHours={item.computedHours}
+                      initialHoursOverride={item.hoursOverride}
+                      initialNote={item.note ?? null}
+                      initialPhotoUrl={item.ownPhotoUrl ?? null}
+                      variant="icon"
+                    />
                   )}
                 </div>
 

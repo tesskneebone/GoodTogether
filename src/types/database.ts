@@ -60,6 +60,9 @@ export type Signup = {
   opportunity_id: string;
   volunteer_id: string;
   status: SignupStatus;
+  note: string | null;
+  photo_url: string | null;
+  hours_override: number | null;
   created_at: string;
 };
 
@@ -107,6 +110,9 @@ export type Follow = {
 export type SavedOpportunity = {
   volunteer_id: string;
   opportunity_id: string;
+  note: string | null;
+  photo_url: string | null;
+  hours_override: number | null;
   created_at: string;
 };
 
