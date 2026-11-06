@@ -202,10 +202,6 @@ export default async function DashboardPage() {
             See activity feed &rarr;
           </Link>
         </div>
-        <p className="mt-1 text-xs text-outline">
-          Hours and badges are self-reported based on your sign-ups, imported listings you&apos;ve
-          marked as signed up, and logged activities &mdash; not independently verified.
-        </p>
         <div className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-surface-container-low p-3 text-center sm:flex sm:gap-8 sm:bg-transparent sm:p-0 sm:text-left">
           <div>
             <p className="text-3xl font-bold text-primary">{stats.totalHours}</p>
@@ -268,6 +264,11 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+
+      <p className="mt-10 text-center text-xs text-outline">
+        Hours and badges are self-reported based on your sign-ups, imported listings you&apos;ve
+        marked as signed up, and logged activities &mdash; not independently verified.
+      </p>
     </div>
   );
 }

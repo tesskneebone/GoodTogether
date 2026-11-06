@@ -26,11 +26,6 @@ interface FeedItem {
   feedAt: string;
   note?: string | null;
   photoUrl?: string | null;
-  /** The user's own uploaded photo, if any -- distinct from photoUrl,
-   *  which falls back to the opportunity's stock photo for signup/saved
-   *  items. Used to seed the edit modal so it doesn't treat that stock
-   *  photo as something the user chose. */
-  ownPhotoUrl?: string | null;
   location?: string | null;
   editHref?: string;
 }
@@ -105,8 +100,7 @@ export default async function FeedPage({
         happenedAt: opp.ends_at,
         feedAt: opp.ends_at,
         note: row.note,
-        photoUrl: row.photo_url ?? opp.image_url,
-        ownPhotoUrl: row.photo_url,
+        photoUrl: row.photo_url,
       };
     })
     .filter((x): x is FeedItem => x !== null);
@@ -134,8 +128,7 @@ export default async function FeedPage({
         happenedAt: opp.ends_at,
         feedAt: opp.ends_at,
         note: row.note,
-        photoUrl: row.photo_url ?? opp.image_url,
-        ownPhotoUrl: row.photo_url,
+        photoUrl: row.photo_url,
       };
     })
     .filter((x): x is FeedItem => x !== null);
@@ -395,16 +388,11 @@ export default async function FeedPage({
         </div>
       </div>
 
-      <div className="px-margin pt-3 pb-1">
+      <div className="px-margin pt-3 pb-1 flex items-baseline justify-between gap-2">
         <h1 className="font-headline-md text-headline-md text-on-background">Activity feed</h1>
-        <p className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">
-          Real volunteering from across the GoodTogether community &mdash; self-reported, not
-          independently verified.{" "}
-          <Link href="/leaderboard" className="text-secondary hover:underline">
-            See the leaderboard
-          </Link>
-          .
-        </p>
+        <Link href="/leaderboard" className="font-label-md text-label-md font-semibold text-secondary hover:underline flex-shrink-0">
+          See the leaderboard
+        </Link>
       </div>
 
       {combined.length === 0 ? (
@@ -480,7 +468,7 @@ export default async function FeedPage({
                       computedHours={item.computedHours}
                       initialHoursOverride={item.hoursOverride}
                       initialNote={item.note ?? null}
-                      initialPhotoUrl={item.ownPhotoUrl ?? null}
+                      initialPhotoUrl={item.photoUrl ?? null}
                       variant="icon"
                     />
                   )}

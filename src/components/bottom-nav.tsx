@@ -1,24 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const TABS = [
   { href: "/opportunities", label: "Browse", icon: "explore" },
   { href: "/feed", label: "Feed", icon: "local_fire_department" },
   { href: "/dashboard", label: "Impact", icon: "eco" },
-  { href: "/opportunities?view=map", label: "Map", icon: "pin_drop" },
   { href: "/profile", label: "Profile", icon: "person" },
 ] as const;
 
 export function BottomNav() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const isMapView = searchParams.get("view") === "map";
 
   function isActive(href: string) {
-    if (href === "/opportunities?view=map") return pathname === "/opportunities" && isMapView;
-    if (href === "/opportunities") return pathname === "/opportunities" && !isMapView;
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
