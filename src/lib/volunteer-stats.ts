@@ -1,12 +1,22 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, OpportunityCategory } from "@/types/database";
 
+export interface WeeklyImpactPoint {
+  weekStart: string;
+  hours: number;
+}
+
 export interface VolunteerStats {
   totalHours: number;
   hoursThisWeek: number;
+  completedThisWeek: number;
   hoursByCategory: Partial<Record<OpportunityCategory, number>>;
   completedCount: number;
+  /** Hours completed per week, oldest to newest, for the last 12 weeks (including this week). */
+  weeklyHours: WeeklyImpactPoint[];
 }
+
+const IMPACT_CHART_WEEKS = 12;
 
 function startOfWeek(): Date {
   const now = new Date();
@@ -45,10 +55,25 @@ export async function getVolunteerStats(
   ]);
 
   const weekStart = startOfWeek();
+  const weekStarts = Array.from({ length: IMPACT_CHART_WEEKS }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() - (IMPACT_CHART_WEEKS - 1 - i) * 7);
+    return d;
+  });
+  const weeklyHoursBuckets = new Array(IMPACT_CHART_WEEKS).fill(0) as number[];
+
+  function weekIndexFor(date: Date): number | null {
+    if (date < weekStarts[0]) return null;
+    for (let i = IMPACT_CHART_WEEKS - 1; i >= 0; i--) {
+      if (date >= weekStarts[i]) return i;
+    }
+    return null;
+  }
 
   let totalHours = 0;
   let hoursThisWeek = 0;
   let completedCount = 0;
+  let completedThisWeek = 0;
   const hoursByCategory: Partial<Record<OpportunityCategory, number>> = {};
 
   type OppSlice = { category: OpportunityCategory; starts_at: string; ends_at: string };
@@ -66,9 +91,13 @@ export async function getVolunteerStats(
     completedCount += 1;
     hoursByCategory[opp.category] = (hoursByCategory[opp.category] ?? 0) + hours;
 
-    if (new Date(opp.starts_at) >= weekStart) {
+    const startsAt = new Date(opp.starts_at);
+    if (startsAt >= weekStart) {
       hoursThisWeek += hours;
+      completedThisWeek += 1;
     }
+    const weekIndex = weekIndexFor(startsAt);
+    if (weekIndex !== null) weeklyHoursBuckets[weekIndex] += hours;
   }
 
   for (const row of signupRows ?? []) {
@@ -90,15 +119,26 @@ export async function getVolunteerStats(
     completedCount += 1;
     hoursByCategory[row.category] = (hoursByCategory[row.category] ?? 0) + row.hours;
 
-    if (new Date(row.occurred_at) >= weekStart) {
+    const occurredAt = new Date(row.occurred_at);
+    if (occurredAt >= weekStart) {
       hoursThisWeek += row.hours;
+      completedThisWeek += 1;
     }
+    const weekIndex = weekIndexFor(occurredAt);
+    if (weekIndex !== null) weeklyHoursBuckets[weekIndex] += row.hours;
   }
+
+  const weeklyHours: WeeklyImpactPoint[] = weekStarts.map((d, i) => ({
+    weekStart: d.toISOString(),
+    hours: Math.round(weeklyHoursBuckets[i] * 10) / 10,
+  }));
 
   return {
     totalHours: Math.round(totalHours * 10) / 10,
     hoursThisWeek: Math.round(hoursThisWeek * 10) / 10,
+    completedThisWeek,
     hoursByCategory,
     completedCount,
+    weeklyHours,
   };
 }
