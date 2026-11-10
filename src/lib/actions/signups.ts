@@ -22,7 +22,7 @@ export async function signUpForOpportunity(opportunityId: string) {
   }
 
   revalidatePath(`/opportunities/${opportunityId}`);
-  revalidatePath("/dashboard");
+  revalidatePath("/profile");
   return { error: null };
 }
 
@@ -47,6 +47,6 @@ export async function cancelSignup(opportunityId: string) {
   }
 
   revalidatePath(`/opportunities/${opportunityId}`);
-  revalidatePath("/dashboard");
+  revalidatePath("/profile");
   return { error: null };
 }

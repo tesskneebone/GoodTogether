@@ -71,7 +71,7 @@ export function FeedSidebarProfile({
           Log activity
         </Link>
         <Link
-          href="/dashboard"
+          href="/profile"
           className="flex items-center justify-center gap-1.5 rounded-full py-2 font-label-md text-label-md font-semibold text-on-surface-variant hover:bg-surface-container-low"
         >
           See your impact

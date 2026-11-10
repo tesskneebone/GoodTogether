@@ -1,42 +1,34 @@
-"use client";
+import { createClient } from "@/lib/supabase/server";
+import { BottomNavTabs, type NavTab } from "@/components/bottom-nav-tabs";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-const TABS = [
+const VOLUNTEER_TABS: NavTab[] = [
   { href: "/opportunities", label: "Browse", icon: "explore" },
   { href: "/feed", label: "Feed", icon: "local_fire_department" },
-  { href: "/dashboard", label: "Impact", icon: "eco" },
   { href: "/profile", label: "Profile", icon: "person" },
-] as const;
+];
 
-export function BottomNav() {
-  const pathname = usePathname();
+const ORG_TABS: NavTab[] = [
+  { href: "/opportunities", label: "Browse", icon: "explore" },
+  { href: "/feed", label: "Feed", icon: "local_fire_department" },
+  { href: "/dashboard", label: "Dashboard", icon: "eco" },
+  { href: "/profile", label: "Profile", icon: "person" },
+];
 
-  function isActive(href: string) {
-    return pathname === href || pathname.startsWith(`${href}/`);
+export async function BottomNav() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isOrg = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isOrg = profile?.role === "org";
   }
 
-  return (
-    <nav className="fixed bottom-0 inset-x-0 z-[1100] pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(27,77,62,0.06)]">
-      <div className="flex justify-around items-center h-20 px-space-xs">
-        {TABS.map((tab) => {
-          const active = isActive(tab.href);
-          return (
-            <Link
-              key={tab.label}
-              href={tab.href}
-              aria-current={active ? "page" : undefined}
-              className={`flex flex-col items-center justify-center gap-space-xs min-w-[56px] h-14 px-space-xs rounded-full font-label-md text-label-md transition-all duration-200 ${
-                active ? "text-on-primary bg-primary-container" : "text-on-surface-variant"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[24px]">{tab.icon}</span>
-              <span className="leading-none">{tab.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
-  );
+  return <BottomNavTabs tabs={isOrg ? ORG_TABS : VOLUNTEER_TABS} />;
 }

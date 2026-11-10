@@ -27,7 +27,7 @@ export async function toggleSavedOpportunity(
       .eq("opportunity_id", opportunityId);
     if (error) return { error: error.message, saved: true };
     revalidatePath("/dashboard/calendar");
-    revalidatePath("/dashboard");
+    revalidatePath("/profile");
     return { error: null, saved: false };
   }
 
@@ -37,6 +37,6 @@ export async function toggleSavedOpportunity(
   if (error) return { error: error.message, saved: false };
 
   revalidatePath("/dashboard/calendar");
-  revalidatePath("/dashboard");
+  revalidatePath("/profile");
   return { error: null, saved: true };
 }
