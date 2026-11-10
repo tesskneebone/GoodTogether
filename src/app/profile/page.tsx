@@ -6,6 +6,7 @@ import { BadgeGrid } from "@/components/badge-grid";
 import { ProfileBanner } from "@/components/profile-banner";
 import { ImpactChart } from "@/components/impact-chart";
 import { OpportunityCardStack } from "@/components/opportunity-card-v2";
+import { ProfileSignedOutPreview } from "@/components/profile-signed-out-preview";
 import { getVolunteerStats } from "@/lib/volunteer-stats";
 import { getCategoryBadges, getMilestoneBadges, getWeeklyBadge } from "@/lib/badges";
 import type { Opportunity } from "@/types/database";
@@ -16,7 +17,7 @@ export default async function ProfilePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) return <ProfileSignedOutPreview />;
 
   const { data: profile } = await supabase
     .from("profiles")
