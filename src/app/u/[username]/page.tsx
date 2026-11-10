@@ -87,9 +87,17 @@ export default async function PublicProfilePage({
 
           {!isPrivateView && (
             <>
-              {profile.bio && <p className="mt-3 text-sm text-stone-700">{profile.bio}</p>}
+              {!profile.hide_bio && profile.bio && (
+                <p className="mt-3 text-sm text-stone-700">{profile.bio}</p>
+              )}
               {profile.neighborhood && (
-                <p className="mt-1 text-sm text-stone-500">{profile.neighborhood}</p>
+                <p className="mt-1 text-sm text-stone-500">
+                  {profile.neighborhood}
+                  {!profile.hide_age && profile.age && ` · ${profile.age}`}
+                </p>
+              )}
+              {!profile.neighborhood && !profile.hide_age && profile.age && (
+                <p className="mt-1 text-sm text-stone-500">{profile.age}</p>
               )}
 
               <div className="mt-4 flex gap-6 text-sm">

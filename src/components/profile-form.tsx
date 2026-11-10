@@ -90,6 +90,15 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               className={inputClass}
               defaultValue={profile.age ?? ""}
             />
+            <label className="mt-1.5 flex items-center gap-1.5 text-xs text-outline">
+              <input
+                type="checkbox"
+                name="hide_age"
+                defaultChecked={profile.hide_age}
+                className="h-3.5 w-3.5 rounded border-outline-variant text-secondary focus:ring-secondary"
+              />
+              Hide from public profile
+            </label>
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-on-surface-variant">
@@ -122,6 +131,17 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           }
           defaultValue={profile.bio ?? ""}
         />
+        {profile.role !== "org" && (
+          <label className="mt-1.5 flex items-center gap-1.5 text-xs text-outline">
+            <input
+              type="checkbox"
+              name="hide_bio"
+              defaultChecked={profile.hide_bio}
+              className="h-3.5 w-3.5 rounded border-outline-variant text-secondary focus:ring-secondary"
+            />
+            Hide from public profile
+          </label>
+        )}
       </div>
 
       <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-outline-variant p-4">

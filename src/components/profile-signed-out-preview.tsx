@@ -16,6 +16,12 @@ function getSampleStats(): VolunteerStats {
     return { weekStart: d.toISOString(), hours };
   });
 
+  let weekStreak = 0;
+  for (let i = SAMPLE_WEEKLY_HOURS.length - 1; i >= 0; i--) {
+    if (SAMPLE_WEEKLY_HOURS[i] <= 0) break;
+    weekStreak += 1;
+  }
+
   return {
     totalHours: 32,
     hoursThisWeek: 4,
@@ -23,6 +29,7 @@ function getSampleStats(): VolunteerStats {
     completedCount: 14,
     hoursByCategory: { environment: 14, animal_welfare: 11, food_security: 4 },
     weeklyHours,
+    weekStreak,
   };
 }
 

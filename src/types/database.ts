@@ -25,6 +25,8 @@ export type Profile = {
   org_name: string | null;
   bio: string | null;
   age: number | null;
+  hide_age: boolean;
+  hide_bio: boolean;
   neighborhood: string | null;
   avatar_url: string | null;
   is_private: boolean;

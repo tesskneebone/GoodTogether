@@ -14,6 +14,8 @@ export interface VolunteerStats {
   completedCount: number;
   /** Hours completed per week, oldest to newest, for the last 12 weeks (including this week). */
   weeklyHours: WeeklyImpactPoint[];
+  /** Consecutive recent weeks (including this one) with at least some volunteering. */
+  weekStreak: number;
 }
 
 const IMPACT_CHART_WEEKS = 12;
@@ -133,6 +135,12 @@ export async function getVolunteerStats(
     hours: Math.round(weeklyHoursBuckets[i] * 10) / 10,
   }));
 
+  let weekStreak = 0;
+  for (let i = weeklyHoursBuckets.length - 1; i >= 0; i--) {
+    if (weeklyHoursBuckets[i] <= 0) break;
+    weekStreak += 1;
+  }
+
   return {
     totalHours: Math.round(totalHours * 10) / 10,
     hoursThisWeek: Math.round(hoursThisWeek * 10) / 10,
@@ -140,5 +148,6 @@ export async function getVolunteerStats(
     hoursByCategory,
     completedCount,
     weeklyHours,
+    weekStreak,
   };
 }
